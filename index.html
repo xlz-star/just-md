@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Just MD - Markdown 编辑器</title>
+  <link rel="stylesheet" href="/src/styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- 添加一个简单的图标库 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+</head>
+<body>
+  <div id="app">
+    <div id="navbar">
+      <div class="nav-brand">Just MD</div>
+      <div class="nav-menu">
+        <div class="menu-item" id="file-menu">
+          <span>文件</span>
+          <div class="dropdown-menu">
+            <div class="dropdown-item" id="open-file">
+              <span>打开文件</span>
+              <span class="shortcut">Ctrl+O</span>
+            </div>
+            <div class="dropdown-item" id="save-file">
+              <span>保存文件</span>
+              <span class="shortcut">Ctrl+S</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" id="exit-app">
+              <span>退出</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item" id="edit-menu">
+          <span>编辑</span>
+          <div class="dropdown-menu">
+            <div class="dropdown-item" id="undo">
+              <span>撤销</span>
+              <span class="shortcut">Ctrl+Z</span>
+            </div>
+            <div class="dropdown-item" id="redo">
+              <span>重做</span>
+              <span class="shortcut">Ctrl+Y</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 文件列表区域 -->
+    <div id="file-tabs">
+      <div class="file-tabs-container">
+        <!-- 文件标签将在这里动态添加 -->
+      </div>
+    </div>
+    
+    <div id="main-content">
+      <!-- 左侧大纲区域 -->
+      <div id="outline-panel" class="outline-panel hidden">
+        <div class="outline-header">
+          <h3>文档大纲</h3>
+          <div class="outline-actions">
+            <button id="pin-outline-btn" class="outline-action-btn" title="固定大纲">
+              <i class="ri-pushpin-line"></i>
+            </button>
+          </div>
+        </div>
+        <div id="outline-content" class="outline-content">
+          <!-- 大纲内容将在这里动态添加 -->
+        </div>
+      </div>
+      
+      <!-- 遮罩层，用于点击隐藏大纲 -->
+      <div id="outline-overlay" class="outline-overlay hidden"></div>
+      
+      <div id="editor"></div>
+    </div>
+    
+    <!-- 左下角的大纲按钮 -->
+    <button id="outline-btn" class="floating-btn outline-btn" title="显示大纲">
+      <i class="ri-list-check"></i>
+    </button>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
