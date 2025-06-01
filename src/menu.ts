@@ -4,15 +4,13 @@ import { getEditor } from './editor'
 
 // 初始化菜单
 export function initMenus(): void {
-  // 文件菜单
-  const fileMenu = document.getElementById('file-menu')
+  // 文件菜单项
   const openFileItem = document.getElementById('open-file')
   const openFolderItem = document.getElementById('open-folder')
   const saveFileItem = document.getElementById('save-file')
   const exitAppItem = document.getElementById('exit-app')
   
-  // 编辑菜单
-  const editMenu = document.getElementById('edit-menu')
+  // 编辑菜单项
   const undoItem = document.getElementById('undo')
   const redoItem = document.getElementById('redo')
   

@@ -37,6 +37,11 @@ export function initOutlineFeature(): void {
     toggleFiletreeBtn.title = '切换到文件树视图'
   }
   
+  // 确保调整器元素存在
+  if (outlineResizer) {
+    console.log('大纲调整器初始化完成')
+  }
+  
   // 点击大纲按钮显示/隐藏大纲面板
   outlineBtn?.addEventListener('click', (e) => {
     e.preventDefault()
@@ -465,7 +470,6 @@ function updateActiveOutlineItem(): void {
   
   // 获取当前光标位置
   const { from } = editor.state.selection
-  let currentHeadingPos = -1
   let currentHeadingIndex = -1
   
   // 查找当前光标所在的标题或其父标题
@@ -476,7 +480,6 @@ function updateActiveOutlineItem(): void {
     // 检查光标是否在这个标题的范围内
     if (from >= heading.pos) {
       if (nextHeading === null || from < nextHeading.pos) {
-        currentHeadingPos = heading.pos
         currentHeadingIndex = i
         break
       }

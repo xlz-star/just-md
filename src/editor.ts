@@ -6,7 +6,7 @@ import { updateOutlineIfNeeded } from './outline.ts'
 let editor: Editor
 
 // 初始化编辑器
-export function initEditor(content: string = '', onContentChange?: (isDirty: boolean, currentContent: string) => void): Editor {
+export function initEditor(content: string = '', onContentChange?: (isDirty: boolean) => void): Editor {
   // 如果已存在编辑器，先销毁
   if (editor) {
     editor.destroy()
@@ -30,7 +30,7 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
         class: 'focus:outline-none',
       },
     },
-    onSelectionUpdate: ({ editor }) => {
+    onSelectionUpdate: () => {
       // 触发大纲更新
       updateOutlineIfNeeded()
     },
@@ -45,13 +45,10 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
   }
   
   // 监听编辑器内容变化
-  editor.on('update', ({ editor: updatedEditor }) => {
-    // 获取当前内容
-    const currentContent = updatedEditor.getHTML()
-    
+  editor.on('update', () => {
     // 如果设置了内容变化回调，调用它
     if (onContentChange) {
-      onContentChange(true, currentContent)
+      onContentChange(true)
     }
     
     // 触发大纲更新
@@ -86,7 +83,7 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
   
   // 添加点击事件处理
   const editorElement = document.querySelector('#editor') as HTMLElement
-  editorElement.addEventListener('click', (e) => {
+  editorElement.addEventListener('click', () => {
     // 如果编辑器已经获得焦点，不需要处理
     if (editor.isFocused) return
     

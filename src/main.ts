@@ -8,7 +8,7 @@ import './styles.css'
 async function main() {
   try {
     // 初始化编辑器，并添加内容变化回调
-    initEditor('', (isDirty: boolean, currentContent: string) => {
+    initEditor('', (isDirty: boolean) => {
       // 在此处理编辑器内容变化
       // 例如标记文件为已编辑
       console.log('编辑器内容已变化，脏状态:', isDirty)
