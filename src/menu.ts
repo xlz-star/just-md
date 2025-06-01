@@ -7,6 +7,7 @@ export function initMenus(): void {
   // 文件菜单
   const fileMenu = document.getElementById('file-menu')
   const openFileItem = document.getElementById('open-file')
+  const openFolderItem = document.getElementById('open-folder')
   const saveFileItem = document.getElementById('save-file')
   const exitAppItem = document.getElementById('exit-app')
   
@@ -56,6 +57,11 @@ export function initMenus(): void {
   
   // 文件菜单项事件
   openFileItem?.addEventListener('click', openFile)
+  openFolderItem?.addEventListener('click', () => {
+    // 暂时只显示一个提示，未实现打开文件夹功能
+    console.log('打开文件夹功能尚未实现')
+    alert('打开文件夹功能将在未来版本中实现')
+  })
   saveFileItem?.addEventListener('click', saveFile)
   exitAppItem?.addEventListener('click', () => {
     exit(0).catch((err: Error) => console.error('退出失败:', err))
@@ -82,10 +88,18 @@ export function initKeyboardShortcuts(): void {
       saveFile()
     }
     
-    // Ctrl+O 打开
+    // Ctrl+O 打开文件
     if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
       e.preventDefault()
       openFile()
+    }
+    
+    // Ctrl+K 打开文件夹
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault()
+      // 暂时只显示一个提示，未实现打开文件夹功能
+      console.log('打开文件夹功能尚未实现')
+      alert('打开文件夹功能将在未来版本中实现')
     }
   })
 } 

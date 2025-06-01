@@ -1,4 +1,3 @@
-import { invoke } from '@tauri-apps/api/core'
 import { initEditor, initDragAndDrop } from './editor'
 import { initOutlineFeature } from './outline'
 import { initMenus, initKeyboardShortcuts } from './menu'

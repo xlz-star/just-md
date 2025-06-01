@@ -20,6 +20,10 @@
               <span>打开文件</span>
               <span class="shortcut">Ctrl+O</span>
             </div>
+            <div class="dropdown-item" id="open-folder">
+              <span>打开文件夹</span>
+              <span class="shortcut">Ctrl+K</span>
+            </div>
             <div class="dropdown-item" id="save-file">
               <span>保存文件</span>
               <span class="shortcut">Ctrl+S</span>
@@ -59,14 +63,22 @@
         <div class="outline-header">
           <h3>文档大纲</h3>
           <div class="outline-actions">
+            <button id="toggle-filetree-btn" class="outline-action-btn" title="切换到文件树视图">
+              <i class="ri-folder-line"></i>
+            </button>
             <button id="pin-outline-btn" class="outline-action-btn" title="固定大纲">
               <i class="ri-pushpin-line"></i>
+            </button>
+            <button id="close-outline-btn" class="outline-action-btn" title="关闭大纲">
+              <i class="ri-close-line"></i>
             </button>
           </div>
         </div>
         <div id="outline-content" class="outline-content">
           <!-- 大纲内容将在这里动态添加 -->
         </div>
+        <!-- 调整大纲宽度的手柄 -->
+        <div id="outline-resizer" class="outline-resizer" title="调整大纲宽度"></div>
       </div>
       
       <!-- 遮罩层，用于点击隐藏大纲 -->

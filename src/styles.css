@@ -119,7 +119,8 @@ body {
 /* 左侧大纲面板 */
 .outline-panel {
   width: 250px;
-  min-width: 250px;
+  min-width: 150px;
+  max-width: 500px;
   height: 100%;
   background-color: #f8f9fa;
   border-right: 1px solid #dee2e6;
@@ -137,7 +138,7 @@ body {
   transform: translateX(0);
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   opacity: 1;
-  will-change: transform, opacity;
+  will-change: transform, opacity, width;
   backface-visibility: hidden;
   -webkit-font-smoothing: subpixel-antialiased;
 }
@@ -209,6 +210,23 @@ body {
 .outline-action-btn:hover {
   background-color: #e9ecef;
   color: #228be6;
+}
+
+/* 文件树按钮样式 */
+#toggle-filetree-btn {
+  margin-right: 2px;
+  color: #495057;
+}
+
+#toggle-filetree-btn:hover {
+  color: #228be6;
+  background-color: #e9ecef;
+}
+
+/* 关闭按钮特定样式 */
+#close-outline-btn:hover {
+  background-color: #fa5252;
+  color: white;
 }
 
 .outline-content {
@@ -572,4 +590,148 @@ body {
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
+}
+
+/* 大纲宽度调整器 */
+.outline-resizer {
+  position: absolute;
+  top: 0;
+  right: -5px;
+  width: 10px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 11;
+  background-color: transparent;
+}
+
+.outline-resizer:hover {
+  background-color: rgba(25, 113, 194, 0.1);
+}
+
+.outline-resizer.active {
+  background-color: rgba(25, 113, 194, 0.2);
+}
+
+/* 大纲调整时的全局状态 */
+body.resizing-outline {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* 调整宽度时禁用过渡效果 */
+body.resizing-outline .outline-panel {
+  transition: none;
+}
+
+/* 文件树样式 */
+.file-tree-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.file-tree-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #dee2e6;
+  background-color: #f1f3f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-tree-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.file-tree-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.file-tree-action-btn {
+  background: none;
+  border: none;
+  color: #495057;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.file-tree-action-btn:hover {
+  background-color: #e9ecef;
+  color: #228be6;
+}
+
+.file-tree-root-path {
+  padding: 8px 16px;
+  color: #6c757d;
+  font-size: 13px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-tree-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.file-tree-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.file-tree-item:hover {
+  background-color: rgba(25, 113, 194, 0.08);
+}
+
+.file-tree-icon {
+  margin-right: 6px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  cursor: pointer;
+}
+
+.file-tree-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  color: #495057;
+  cursor: pointer;
+  flex: 1;
+}
+
+.file-tree-empty {
+  padding: 20px;
+  text-align: center;
+  color: #868e96;
+  font-style: italic;
+}
+
+/* 文件树内部的ul元素样式 */
+.file-tree-item ul {
+  width: 100%;
+  margin-top: 4px;
 }

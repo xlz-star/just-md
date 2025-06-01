@@ -1,7 +1,6 @@
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import { updateOutlineIfNeeded } from './outline.ts'
-import { OpenedFile } from './types'
 
 // 全局编辑器变量
 let editor: Editor
@@ -111,7 +110,35 @@ export function getEditorContent(): string {
 // 设置编辑器内容
 export function setEditorContent(content: string): void {
   if (editor) {
+    // 设置内容
     editor.commands.setContent(content)
+    
+    // 确保内容不被当作默认内容处理
+    const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
+    if (proseMirror) {
+      // 如果有内容，移除默认内容样式
+      if (content && content !== '<p></p>' && content !== '<p><br></p>') {
+        proseMirror.classList.remove('using-default-content')
+      }
+      // 如果没有内容且没有打开文件，添加默认内容样式
+      else if (!getCurrentFilePath() && (!content || content === '<p></p>' || content === '<p><br></p>')) {
+        proseMirror.classList.add('using-default-content')
+      }
+    }
+    
+    // 手动激活编辑器，确保显示正常
+    if (content && !editor.isFocused) {
+      // 尝试给编辑器元素发送一个点击事件
+      const editorElement = document.querySelector('#editor') as HTMLElement
+      if (editorElement) {
+        // 如果有内容，强制编辑器获得焦点一次，然后立即失去焦点
+        // 这样可以确保内容被正确渲染
+        editor.commands.focus()
+        setTimeout(() => {
+          editor.commands.blur()
+        }, 10)
+      }
+    }
   }
 }
 

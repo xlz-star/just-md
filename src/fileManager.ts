@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { open, save } from '@tauri-apps/plugin-dialog'
 import { OpenedFile } from './types'
 import { getEditorContent, setEditorContent, setCurrentFile, getCurrentFilePath } from './editor'
-import { resetOutlineState, updateOutlineIfNeeded } from './outline'
+import { resetOutlineState, updateOutlineIfNeeded, isOutlineVisible } from './outline'
 
 // 打开的文件列表
 const openedFiles: OpenedFile[] = []
@@ -10,6 +10,24 @@ const openedFiles: OpenedFile[] = []
 // 生成唯一ID
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
+}
+
+// 检查并刷新文件树
+function refreshFileTreeIfNeeded(): void {
+  // 检查大纲面板是否固定且可见，并且在文件树视图模式下
+  const outlinePanel = document.getElementById('outline-panel')
+  if (outlinePanel && isOutlineVisible() && outlinePanel.classList.contains('pinned')) {
+    // 检查是否处于文件树视图
+    const fileTreeContainer = document.getElementById('file-tree-container')
+    if (fileTreeContainer && fileTreeContainer.style.display !== 'none') {
+      // 动态导入文件树模块并刷新
+      import('./filetree').then(filetreeModule => {
+        filetreeModule.loadFileTree().then(() => {
+          filetreeModule.renderFileTree()
+        })
+      })
+    }
+  }
 }
 
 // 打开文件
@@ -44,6 +62,9 @@ export async function openFile(): Promise<void> {
           
           // 添加到标签列表
           addFileTab(file)
+          
+          // 刷新文件树（如果需要）
+          refreshFileTreeIfNeeded()
         } else {
           console.error('文件内容为空')
         }
@@ -128,6 +149,9 @@ export async function saveFile(): Promise<void> {
       currentFile.content = content
       updateFileDirtyState(currentFile.id, false)
     }
+    
+    // 刷新文件树（如果需要）
+    refreshFileTreeIfNeeded()
   } catch (e) {
     console.error('保存文件失败:', e)
   }
@@ -215,11 +239,20 @@ export function switchToFile(index: number): void {
   // 更新编辑器内容
   setEditorContent(file.content)
   
+  // 确保编辑器内容不是默认样式
+  const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
+  if (proseMirror) {
+    proseMirror.classList.remove('using-default-content')
+  }
+  
   // 更新标签样式
   updateTabsActiveState(file.id)
   
   // 更新大纲
   updateOutlineIfNeeded()
+  
+  // 刷新文件树（如果需要）
+  refreshFileTreeIfNeeded()
 }
 
 // 关闭文件
@@ -250,7 +283,13 @@ export function closeFile(index: number): void {
       // 没有打开的文件，清空编辑器
       setCurrentFile(null, null)
       setEditorContent('')
+      
+      // 刷新文件树（如果需要）
+      refreshFileTreeIfNeeded()
     }
+  } else {
+    // 即使关闭的不是当前文件，也尝试刷新文件树
+    refreshFileTreeIfNeeded()
   }
 }
 
@@ -351,6 +390,15 @@ export function handleFileDrop(file: File): void {
     
     // 添加到标签列表
     addFileTab(openedFile)
+    
+    // 额外确保编辑器内容不是默认样式
+    const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
+    if (proseMirror) {
+      proseMirror.classList.remove('using-default-content')
+    }
+    
+    // 刷新文件树（如果需要）
+    refreshFileTreeIfNeeded()
   }).catch(err => {
     console.error('读取拖放文件失败:', err)
   })
