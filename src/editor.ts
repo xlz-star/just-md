@@ -1,6 +1,39 @@
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import { updateOutlineIfNeeded } from './outline.ts'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { common, createLowlight } from 'lowlight'
+import 'highlight.js/styles/github.css'
+
+// 注册常用的编程语言
+import javascript from 'highlight.js/lib/languages/javascript'
+import typescript from 'highlight.js/lib/languages/typescript'
+import css from 'highlight.js/lib/languages/css'
+import html from 'highlight.js/lib/languages/xml'
+import json from 'highlight.js/lib/languages/json'
+import rust from 'highlight.js/lib/languages/rust'
+import markdown from 'highlight.js/lib/languages/markdown'
+import python from 'highlight.js/lib/languages/python'
+import csharp from 'highlight.js/lib/languages/csharp'
+import lua from 'highlight.js/lib/languages/lua'
+
+// 创建lowlight实例并注册语言
+const lowlight = createLowlight(common)
+lowlight.register('javascript', javascript)
+lowlight.register('js', javascript)
+lowlight.register('typescript', typescript)
+lowlight.register('ts', typescript)
+lowlight.register('css', css)
+lowlight.register('html', html)
+lowlight.register('json', json)
+lowlight.register('rust', rust)
+lowlight.register('markdown', markdown)
+lowlight.register('md', markdown)
+lowlight.register('python', python)
+lowlight.register('py', python)
+lowlight.register('csharp', csharp)
+lowlight.register('cs', csharp)
+lowlight.register('lua', lua)
 
 // 全局编辑器变量
 let editor: Editor
@@ -22,7 +55,15 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
   editor = new Editor({
     element: document.querySelector('#editor') as HTMLElement,
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        codeBlock: false, // 禁用默认的代码块，使用自定义的
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+        HTMLAttributes: {
+          class: 'code-block',
+        },
+      }),
     ],
     content: content || defaultContent,
     editorProps: {

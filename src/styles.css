@@ -387,11 +387,13 @@ body {
 }
 
 .ProseMirror code {
-  font-family: 'Courier New', Courier, monospace;
-  background-color: #f1f3f5;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Source Code Pro', Menlo, Monaco, 'Courier New', monospace;
+  background-color: rgba(0, 0, 0, 0.08);
   padding: 0.2em 0.4em;
   border-radius: 3px;
   font-size: 0.9em;
+  color: #e83e8c;
+  word-break: break-word;
 }
 
 .ProseMirror pre {
@@ -752,4 +754,107 @@ body.resizing-outline .outline-panel {
 .file-tree-item ul {
   width: 100%;
   margin-top: 4px;
+}
+
+/* 代码块高亮样式 */
+.ProseMirror .code-block {
+  background-color: #f6f8fa;
+  border-radius: 4px;
+  margin: 1em 0;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e1e4e8;
+}
+
+.ProseMirror .code-block::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #57606a;
+  background: #edf0f2;
+  padding: 0.2em 0.5em;
+  font-size: 0.8em;
+  border-bottom-left-radius: 4px;
+  border-left: 1px solid #e1e4e8;
+  border-bottom: 1px solid #e1e4e8;
+  z-index: 1;
+}
+
+.ProseMirror .code-block pre {
+  background: transparent;
+  color: #24292f;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Source Code Pro', Menlo, Monaco, 'Courier New', monospace;
+  padding: 1em 1.5em;
+  margin: 0;
+  tab-size: 2;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+
+.ProseMirror .code-block .hljs-comment,
+.ProseMirror .code-block .hljs-quote {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.ProseMirror .code-block .hljs-keyword,
+.ProseMirror .code-block .hljs-selector-tag {
+  color: #569cd6;
+}
+
+.ProseMirror .code-block .hljs-string,
+.ProseMirror .code-block .hljs-doctag {
+  color: #ce9178;
+}
+
+.ProseMirror .code-block .hljs-number,
+.ProseMirror .code-block .hljs-literal {
+  color: #b5cea8;
+}
+
+.ProseMirror .code-block .hljs-params {
+  color: #9cdcfe;
+}
+
+.ProseMirror .code-block .hljs-built_in,
+.ProseMirror .code-block .hljs-builtin-name,
+.ProseMirror .code-block .hljs-type {
+  color: #4ec9b0;
+}
+
+.ProseMirror .code-block .hljs-class,
+.ProseMirror .code-block .hljs-title {
+  color: #4ec9b0;
+}
+
+.ProseMirror .code-block .hljs-tag,
+.ProseMirror .code-block .hljs-name {
+  color: #569cd6;
+}
+
+.ProseMirror .code-block .hljs-attribute {
+  color: #9cdcfe;
+}
+
+.ProseMirror .code-block .hljs-variable,
+.ProseMirror .code-block .hljs-template-variable {
+  color: #bd63c5;
+}
+
+.ProseMirror .code-block .hljs-regexp {
+  color: #d16969;
+}
+
+/* 内联代码样式 */
+.ProseMirror code {
+  background-color: rgba(175, 184, 193, 0.2);
+  border-radius: 3px;
+  padding: 0.2em 0.4em;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Source Code Pro', Menlo, Monaco, 'Courier New', monospace;
+  font-size: 0.9em;
+  color: #0550ae;
+  word-break: break-word;
 }
