@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use pulldown_cmark::{Parser, Options, html};
 use std::sync::Mutex;
 use std::sync::OnceLock;
+use std::env;
 
 // 全局当前目录变量
 static CURRENT_DIRECTORY: OnceLock<Mutex<Option<String>>> = OnceLock::new();
@@ -275,8 +276,64 @@ fn render_markdown_to_html(markdown: &str) -> String {
     convert_markdown_to_html(markdown)
 }
 
+// 处理命令行参数
+#[tauri::command]
+fn get_cli_args() -> Vec<String> {
+    env::args().collect()
+}
+
+// 检查并处理命令行参数中的文件路径
+fn process_cli_args() -> Option<String> {
+    let args: Vec<String> = env::args().collect();
+    
+    // 第一个参数是程序路径，检查是否有第二个参数
+    if args.len() > 1 {
+        let file_path = &args[1];
+        let path = Path::new(file_path);
+        
+        // 检查路径是否存在
+        if path.exists() {
+            // 如果是文件夹，直接返回
+            if path.is_dir() {
+                return Some(file_path.clone());
+            }
+            // 如果是Markdown文件，返回文件路径
+            else if is_markdown_file(file_path) {
+                return Some(file_path.clone());
+            }
+        }
+    }
+    
+    None
+}
+
+// 发送初始文件路径到前端
+#[tauri::command]
+fn get_initial_file() -> Option<String> {
+    process_cli_args()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 fn main() {
+    // 处理命令行参数
+    if let Some(path) = process_cli_args() {
+        // 如果是目录，设置当前目录
+        let path_obj = Path::new(&path);
+        if path_obj.is_dir() {
+            let mut current_dir = get_current_directory().lock().unwrap();
+            *current_dir = Some(path.clone());
+        }
+        // 如果是文件，设置其父目录为当前目录
+        else if path_obj.is_file() {
+            if let Some(parent) = path_obj.parent() {
+                if let Some(parent_str) = parent.to_str() {
+                    let mut current_dir = get_current_directory().lock().unwrap();
+                    *current_dir = Some(parent_str.to_string());
+                }
+            }
+        }
+    }
+
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
@@ -289,7 +346,9 @@ fn main() {
             get_directory_children,
             get_raw_markdown,
             render_markdown_to_html,
-            set_current_directory
+            set_current_directory,
+            get_cli_args,
+            get_initial_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
