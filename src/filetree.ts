@@ -1,8 +1,10 @@
 import { FileTreeItem } from './types'
-import { getCurrentFilePath } from './editor'
+import { getCurrentFilePath, setEditorContent } from './editor'
 import { invoke } from '@tauri-apps/api/core'
 import { OpenedFile } from './types'
-import { generateId, addFileTab } from './fileManager'
+import { generateId, addFileTab, updateTabsActiveState } from './fileManager'
+import { resetOutlineState, updateOutlineIfNeeded } from './outline'
+import { setCurrentFile } from './editor'
 
 // 文件树状态
 let isFileTreeVisible = false
@@ -10,28 +12,28 @@ let fileTreeData: FileTreeItem[] = []
 let rootFolder: string | null = null
 
 // 加载文件树
-export async function loadFileTree(): Promise<void> {
+export async function loadFileTree(folderPath?: string): Promise<void> {
   try {
-    const currentFilePath = getCurrentFilePath()
-    if (!currentFilePath) {
-      fileTreeData = []
-      return
+    const filePath = folderPath || getCurrentFilePath();
+    if (!filePath) {
+      fileTreeData = [];
+      return;
     }
     
     // 调用Rust后端函数获取文件树数据
-    const result = await invoke('get_file_tree', { filePath: currentFilePath })
+    const result = await invoke('get_file_tree', { filePath });
     
     if (result) {
       // 解析返回的数据并转换字段名为驼峰命名法
-      const { root_path, items } = result as { root_path: string, items: any[] }
-      rootFolder = root_path
-      fileTreeData = items.map(convertItemToCamelCase)
+      const { root_path, items } = result as { root_path: string, items: any[] };
+      rootFolder = root_path;
+      fileTreeData = items.map(convertItemToCamelCase);
     } else {
-      fileTreeData = []
+      fileTreeData = [];
     }
   } catch (error) {
-    console.error('加载文件树失败:', error)
-    fileTreeData = []
+    console.error('加载文件树失败:', error);
+    fileTreeData = [];
   }
 }
 
@@ -157,27 +159,45 @@ export function renderFileTree(): void {
         name.addEventListener('click', async () => {
           // 集成文件管理模块，打开文件
           try {
-            // 调用Tauri的打开文件命令
-            const content = await invoke('read_markdown', { path: item.path })
+            // 获取渲染后的HTML内容用于显示
+            const htmlContent = await invoke<string>('read_markdown', { path: item.path })
             
-            if (content && typeof content === 'string') {
-              // 创建文件对象
+            // 同时获取原始Markdown内容用于保存
+            const markdownContent = await invoke<string>('get_raw_markdown', { path: item.path })
+            
+            if (htmlContent && markdownContent) {
+              // 创建文件对象，保存原始Markdown内容
               const file: OpenedFile = {
                 id: generateId(),
                 path: item.path,
                 name: item.name,
-                content: content,
+                content: markdownContent, // 保存原始Markdown
                 isDirty: false
               }
               
-              // 添加到标签列表并打开
-              addFileTab(file)
+              // 添加到标签列表并设置编辑器内容为渲染后的HTML
+              addFileTab(file, false) // 先添加到标签，但不激活（避免触发switchToFile中的setEditorContent）
               
-              // 额外确保编辑器内容不是默认样式
+              // 手动设置当前文件信息
+              setCurrentFile(file.path, file.name)
+              
+              // 重置大纲结构
+              resetOutlineState()
+              
+              // 设置编辑器内容为渲染后的HTML
+              setEditorContent(htmlContent)
+              
+              // 确保编辑器内容不是默认样式
               const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
               if (proseMirror) {
                 proseMirror.classList.remove('using-default-content')
               }
+              
+              // 更新标签样式
+              updateTabsActiveState(file.id)
+              
+              // 更新大纲
+              updateOutlineIfNeeded()
             }
           } catch (err) {
             console.error('打开文件失败:', err)
@@ -219,6 +239,7 @@ export function switchToFileTree(): void {
   
   // 获取并保存当前面板宽度
   const outlinePanel = document.getElementById('outline-panel')
+  const outlineBtn = document.getElementById('outline-btn')
   let currentWidth = '';
   
   if (outlinePanel) {
@@ -229,6 +250,17 @@ export function switchToFileTree(): void {
     if (outlineHeader) {
       outlineHeader.textContent = '文件树'
     }
+  }
+  
+  // 隐藏大纲按钮
+  if (outlineBtn && !outlineBtn.classList.contains('hidden')) {
+    outlineBtn.classList.add('fade-out')
+    setTimeout(() => {
+      if (outlinePanel && !outlinePanel.classList.contains('hidden')) { 
+        // 如果面板仍然可见，则隐藏按钮
+        outlineBtn.classList.add('hidden')
+      }
+    }, 300);
   }
   
   // 隐藏大纲内容
@@ -252,16 +284,11 @@ export function switchToFileTree(): void {
   
   fileTreeContainer.style.display = 'flex';
   
-  // 加载并渲染文件树
-  loadFileTree().then(() => {
-    renderFileTree()
-    
-    // 恢复宽度
-    if (currentWidth && outlinePanel) {
-      outlinePanel.style.width = currentWidth
-      outlinePanel.style.minWidth = currentWidth
-    }
-  })
+  // 恢复宽度
+  if (currentWidth && outlinePanel) {
+    outlinePanel.style.width = currentWidth
+    outlinePanel.style.minWidth = currentWidth
+  }
   
   // 更新切换按钮状态
   const toggleButton = document.getElementById('toggle-filetree-btn')
@@ -275,6 +302,9 @@ export function switchToFileTree(): void {
   if (outlineContainer) {
     outlineContainer.style.display = 'none'
   }
+  
+  // 注意：从这里移除了文件树的加载和渲染
+  // 由调用者决定何时加载和渲染文件树
 }
 
 // 切换到大纲视图
@@ -283,10 +313,22 @@ export function switchToOutline(): void {
   
   // 保存当前面板宽度
   const outlinePanel = document.getElementById('outline-panel')
+  const outlineBtn = document.getElementById('outline-btn')
   let currentWidth = '';
   
   if (outlinePanel) {
     currentWidth = outlinePanel.style.width || '';
+  }
+  
+  // 隐藏大纲按钮
+  if (outlineBtn && !outlineBtn.classList.contains('hidden')) {
+    outlineBtn.classList.add('fade-out')
+    setTimeout(() => {
+      if (outlinePanel && !outlinePanel.classList.contains('hidden')) { 
+        // 如果面板仍然可见，则隐藏按钮
+        outlineBtn.classList.add('hidden')
+      }
+    }, 300);
   }
   
   // 动态导入避免循环引用
@@ -326,6 +368,35 @@ export function switchToOutline(): void {
       outlineModule.updateOutlineIfNeeded()
     }
   })
+}
+
+// 显示大纲面板
+export function showOutlinePanel(): void {
+  const outlinePanel = document.getElementById('outline-panel');
+  
+  // 如果面板存在且是隐藏状态，直接修改其类以显示
+  if (outlinePanel && outlinePanel.classList.contains('hidden')) {
+    outlinePanel.classList.remove('hidden');
+    
+    // 处理遮罩层
+    const outlineOverlay = document.getElementById('outline-overlay');
+    if (outlineOverlay) {
+      outlineOverlay.classList.remove('hidden');
+    }
+    
+    // 动态导入outline模块并调用其显示方法
+    import('./outline').then(outlineModule => {
+      // 在显示方法可用时调用它
+      if (typeof outlineModule.showOutlinePanel === 'function') {
+        outlineModule.showOutlinePanel();
+      }
+    });
+  } else {
+    // 如果面板不存在或已显示，仅动态导入调用显示方法
+    import('./outline').then(outlineModule => {
+      outlineModule.showOutlinePanel();
+    });
+  }
 }
 
 // 将蛇形命名法转换为驼峰命名法

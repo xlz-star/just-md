@@ -4,6 +4,9 @@ import { OpenedFile } from './types'
 import { getEditorContent, setEditorContent, setCurrentFile, getCurrentFilePath } from './editor'
 import { resetOutlineState, updateOutlineIfNeeded, isOutlineVisible } from './outline'
 
+// 动态导入以避免循环引用
+let filetreeModulePromise: Promise<any> | null = null;
+
 // 打开的文件列表
 const openedFiles: OpenedFile[] = []
 
@@ -47,21 +50,45 @@ export async function openFile(): Promise<void> {
       const fileName = pathParts[pathParts.length - 1]
       
       try {
-        // 读取文件内容
-        const content = await invoke<string>('read_markdown', { path: selected })
+        // 读取渲染后的HTML内容用于显示
+        const htmlContent = await invoke<string>('read_markdown', { path: selected })
         
-        if (content) {
-          // 创建文件对象
+        // 同时获取原始Markdown内容用于保存
+        const markdownContent = await invoke<string>('get_raw_markdown', { path: selected })
+        
+        if (htmlContent && markdownContent) {
+          // 创建文件对象，保存原始Markdown内容
           const file: OpenedFile = {
             id: generateId(),
             path: selected,
             name: fileName,
-            content: content,
+            content: markdownContent, // 保存原始Markdown
             isDirty: false
           }
           
-          // 添加到标签列表
-          addFileTab(file)
+          // 添加到标签列表并设置编辑器内容为渲染后的HTML
+          addFileTab(file, false) // 先添加到标签，但不激活（避免触发switchToFile中的setEditorContent）
+          
+          // 手动设置当前文件信息
+          setCurrentFile(file.path, file.name)
+          
+          // 重置大纲结构
+          resetOutlineState()
+          
+          // 设置编辑器内容为渲染后的HTML
+          setEditorContent(htmlContent)
+          
+          // 确保编辑器内容不是默认样式
+          const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
+          if (proseMirror) {
+            proseMirror.classList.remove('using-default-content')
+          }
+          
+          // 更新标签样式
+          updateTabsActiveState(file.id)
+          
+          // 更新大纲
+          updateOutlineIfNeeded()
           
           // 刷新文件树（如果需要）
           refreshFileTreeIfNeeded()
@@ -379,27 +406,122 @@ export function updateFileTabsVisibility(): void {
 // 处理拖放文件
 export function handleFileDrop(file: File): void {
   file.text().then(content => {
-    // 创建文件对象
-    const openedFile: OpenedFile = {
-      id: generateId(),
-      path: file.name, // 拖放的文件没有完整路径，只用文件名作为临时路径
-      name: file.name,
-      content: content,
-      isDirty: false
-    }
+    // 拖放的文件内容是原始Markdown
+    const markdownContent = content;
     
-    // 添加到标签列表
-    addFileTab(openedFile)
-    
-    // 额外确保编辑器内容不是默认样式
-    const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
-    if (proseMirror) {
-      proseMirror.classList.remove('using-default-content')
-    }
-    
-    // 刷新文件树（如果需要）
-    refreshFileTreeIfNeeded()
+    // 调用后端渲染Markdown为HTML
+    invoke<string>('render_markdown_to_html', { markdown: markdownContent })
+      .then(htmlContent => {
+        // 创建文件对象，保存原始Markdown内容
+        const openedFile: OpenedFile = {
+          id: generateId(),
+          path: file.name, // 拖放的文件没有完整路径，只用文件名作为临时路径
+          name: file.name,
+          content: markdownContent, // 保存原始Markdown
+          isDirty: false
+        }
+        
+        // 添加到标签列表
+        addFileTab(openedFile, false) // 先添加到标签，但不激活
+        
+        // 手动设置当前文件信息
+        setCurrentFile(openedFile.path, openedFile.name)
+        
+        // 重置大纲结构
+        resetOutlineState()
+        
+        // 设置编辑器内容为渲染后的HTML
+        setEditorContent(htmlContent)
+        
+        // 确保编辑器内容不是默认样式
+        const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
+        if (proseMirror) {
+          proseMirror.classList.remove('using-default-content')
+        }
+        
+        // 更新标签样式
+        updateTabsActiveState(openedFile.id)
+        
+        // 更新大纲
+        updateOutlineIfNeeded()
+        
+        // 刷新文件树（如果需要）
+        refreshFileTreeIfNeeded()
+      })
+      .catch(err => {
+        console.error('渲染Markdown失败:', err);
+        
+        // 如果渲染失败，就直接用原始内容
+        const openedFile: OpenedFile = {
+          id: generateId(),
+          path: file.name,
+          name: file.name,
+          content: markdownContent,
+          isDirty: false
+        }
+        
+        // 添加到标签列表
+        addFileTab(openedFile)
+      });
   }).catch(err => {
     console.error('读取拖放文件失败:', err)
   })
+}
+
+// 打开文件夹
+export async function openFolder(): Promise<void> {
+  try {
+    // 打开文件夹选择对话框
+    const selected = await open({
+      multiple: false,
+      directory: true
+    });
+    
+    if (selected && typeof selected === 'string') {
+      // 先设置当前目录为选择的文件夹路径
+      await invoke('set_current_directory', { path: selected });
+      
+      // 如果没有加载filetree模块，则加载它
+      if (!filetreeModulePromise) {
+        filetreeModulePromise = import('./filetree');
+      }
+      
+      const filetreeModule = await filetreeModulePromise;
+      const outlineModule = await import('./outline');
+      
+      // 先获取大纲面板
+      const outlinePanel = document.getElementById('outline-panel');
+      
+      // 处理面板初始可见性
+      if (outlinePanel && outlinePanel.classList.contains('hidden')) {
+        // 面板处于隐藏状态，先显示它
+        outlineModule.showOutlinePanel();
+        
+        // 确保面板完全显示后再继续操作
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      // 将大纲面板切换到文件树视图
+      filetreeModule.switchToFileTree();
+      
+      // 在切换视图后等待一下，确保DOM已更新
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // 如果面板尚未固定，则固定它
+      if (outlinePanel && !outlinePanel.classList.contains('pinned')) {
+        outlineModule.toggleOutlinePinned();
+        
+        // 再等待固定操作完成
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      // 预先加载文件树数据
+      await filetreeModule.loadFileTree(selected);
+      
+      // 最后渲染文件树
+      filetreeModule.renderFileTree();
+    }
+  } catch (e) {
+    console.error('打开文件夹失败:', e);
+  }
 } 

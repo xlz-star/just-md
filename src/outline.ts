@@ -201,6 +201,7 @@ export function showOutlinePanel(): void {
   const outlineOverlay = document.getElementById('outline-overlay')
   const outlineContent = document.getElementById('outline-content')
   const fileTreeContainer = document.getElementById('file-tree-container')
+  const outlineBtn = document.getElementById('outline-btn')
   
   if (outlinePanel && outlineOverlay) {
     // 如果已经有自定义宽度，保留它
@@ -221,6 +222,16 @@ export function showOutlinePanel(): void {
     })
     
     isOutlinePanelVisible = true
+    
+    // 隐藏大纲按钮，应用淡出动画
+    if (outlineBtn) {
+      outlineBtn.classList.add('fade-out')
+      setTimeout(() => {
+        if (isOutlinePanelVisible) { // 确认大纲面板仍然可见
+          outlineBtn.classList.add('hidden')
+        }
+      }, 300); // 动画持续时间
+    }
     
     // 确保大纲内容可见，隐藏文件树内容
     if (outlineContent) {
@@ -256,6 +267,7 @@ export function showOutlinePanel(): void {
 export function hideOutlinePanel(force: boolean = false): void {
   const outlinePanel = document.getElementById('outline-panel')
   const outlineOverlay = document.getElementById('outline-overlay')
+  const outlineBtn = document.getElementById('outline-btn')
   
   if (outlinePanel && outlineOverlay) {
     // 如果已固定且不是强制关闭，不隐藏
@@ -268,6 +280,15 @@ export function hideOutlinePanel(force: boolean = false): void {
     outlineOverlay.classList.add('hidden')
     
     isOutlinePanelVisible = false
+    
+    // 显示大纲按钮，应用淡入动画
+    if (outlineBtn) {
+      outlineBtn.classList.remove('hidden')
+      // 等待一帧后移除淡出类，这样可以触发CSS过渡
+      requestAnimationFrame(() => {
+        outlineBtn.classList.remove('fade-out')
+      })
+    }
     
     // 如果是强制关闭并且当前是固定状态，切换固定状态
     if (force && isOutlinePanelPinned) {

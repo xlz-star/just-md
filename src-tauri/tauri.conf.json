@@ -13,7 +13,8 @@
         "resizable": true,
         "title": "Just MD - Markdown 编辑器",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "decorations": false
       }
     ],
     "withGlobalTauri": false

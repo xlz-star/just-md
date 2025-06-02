@@ -1,5 +1,5 @@
 import { exit } from '@tauri-apps/plugin-process'
-import { openFile, saveFile } from './fileManager'
+import { openFile, saveFile, openFolder } from './fileManager'
 import { getEditor } from './editor'
 
 // 初始化菜单
@@ -55,14 +55,10 @@ export function initMenus(): void {
   
   // 文件菜单项事件
   openFileItem?.addEventListener('click', openFile)
-  openFolderItem?.addEventListener('click', () => {
-    // 暂时只显示一个提示，未实现打开文件夹功能
-    console.log('打开文件夹功能尚未实现')
-    alert('打开文件夹功能将在未来版本中实现')
-  })
+  openFolderItem?.addEventListener('click', openFolder)
   saveFileItem?.addEventListener('click', saveFile)
   exitAppItem?.addEventListener('click', () => {
-    exit(0).catch((err: Error) => console.error('退出失败:', err))
+    exit(0)
   })
   
   // 编辑菜单项事件
@@ -95,9 +91,7 @@ export function initKeyboardShortcuts(): void {
     // Ctrl+K 打开文件夹
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault()
-      // 暂时只显示一个提示，未实现打开文件夹功能
-      console.log('打开文件夹功能尚未实现')
-      alert('打开文件夹功能将在未来版本中实现')
+      openFolder()
     }
   })
 } 
