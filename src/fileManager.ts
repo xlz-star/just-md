@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { open, save } from '@tauri-apps/plugin-dialog'
 import { OpenedFile } from './types'
 import { getEditorContent, setEditorContent, setCurrentFile, getCurrentFilePath } from './editor'
-import { resetOutlineState, updateOutlineIfNeeded, isOutlineVisible } from './outline'
+import { resetOutlineState, updateOutlineIfNeeded } from './outline'
 
 // 动态导入以避免循环引用
 let filetreeModulePromise: Promise<any> | null = null;

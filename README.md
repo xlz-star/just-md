@@ -1,7 +1,92 @@
-# Tauri + Vanilla TS
+# Just MD - 简洁高效的Markdown编辑器
 
-This template should help get you started developing with Tauri in vanilla HTML, CSS and Typescript.
+<div align="center">
+  <img src="https://raw.githubusercontent.com/remixicon/remixicon/master/icons/Document/markdown-line.svg" width="120" height="120" alt="Just MD Logo">
+</div>
 
-## Recommended IDE Setup
+## ✨ 特色功能
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- **简洁优雅的界面** - 专注于内容创作，减少干扰
+- **实时预览** - 所见即所得的编辑体验
+- **文档大纲** - 快速导航和组织文档结构
+- **文件树浏览** - 轻松管理和切换多个文档
+- **夜间模式** - 保护眼睛，提供舒适的夜间编辑体验
+- **多文件标签** - 同时处理多个文档，提高工作效率
+- **超轻量级** - 基于Tauri构建，占用资源少，启动迅速
+- **跨平台支持** - 支持Windows、macOS和Linux，体验一致
+
+## 🚀 快速开始
+
+### 安装
+
+1. 从[发布页面](https://github.com/yourusername/just-md/releases)下载适合您系统的安装包
+2. 安装并启动应用
+
+### 基本操作
+
+- **打开文件**: Ctrl+O 或 菜单 > 文件 > 打开文件
+- **保存文件**: Ctrl+S 或 菜单 > 文件 > 保存文件
+- **打开文件夹**: Ctrl+K 或 菜单 > 文件 > 打开文件夹
+- **切换大纲/文件树**: 点击左侧面板顶部的切换按钮
+- **切换夜间模式**: 点击右下角的月亮/太阳图标
+
+## 🔍 核心功能详解
+
+### 文档大纲
+
+自动提取文档标题，构建文档结构树，方便快速导航和了解文档组织。点击大纲中的任意条目，即可跳转到对应位置。
+
+### 文件树浏览
+
+打开文件夹后，可以在左侧面板浏览文件结构，快速切换和管理多个文档文件。
+
+### 多文件标签
+
+同时打开多个文档，通过标签快速切换，提高工作效率。未保存的文件会显示指示标记。
+
+### 夜间模式
+
+内置精心设计的夜间主题，减少眼睛疲劳，适合长时间工作和夜间使用。
+
+## 🛠️ 技术栈
+
+- **前端**: TypeScript, HTML, CSS
+- **后端**: Rust, Tauri
+- **编辑器**: Tiptap
+
+## ⚡ 为什么选择 Just MD？
+
+### 极致轻量
+
+基于Tauri构建，相比Electron应用：
+- **安装包体积小**: 通常比同类Electron应用小10倍以上
+- **内存占用少**: 运行时内存占用显著降低，更适合长时间使用
+- **启动速度快**: 几乎瞬时启动，无需等待
+- **系统资源友好**: 充分利用系统原生组件，减少资源消耗
+
+### 原生性能
+
+- 核心功能由Rust实现，性能卓越
+- 无缝集成系统原生功能，如文件操作
+- 即使处理大型文档也保持流畅响应
+
+### 安全可靠
+
+- 默认安全的权限模型
+- 最小化攻击面
+- 稳定可靠的文件处理
+
+## 🔮 未来计划
+
+- [ ] 自定义主题
+- [ ] 云同步功能
+- [ ] 更多Markdown扩展语法支持
+- [ ] 插件系统
+
+## 📝 许可证
+
+MIT
+
+## 🙏 致谢
+
+感谢所有开源项目的贡献者，他们的工作使得Just MD成为可能。
