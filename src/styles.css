@@ -946,19 +946,22 @@ body.resizing-outline .outline-panel {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #1971c2;
+  border: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 1000;
-  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  color: white;
 }
 
 #theme-toggle-btn:hover {
   transform: scale(1.05);
+  background-color: #1864ab;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
 #theme-toggle-btn:active {
@@ -966,8 +969,14 @@ body.resizing-outline .outline-panel {
 }
 
 body.dark-mode #theme-toggle-btn {
-  background-color: #252525;
-  border-color: #444;
+  background-color: #74c0fc;
+  color: #1a1a1a;
+  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode #theme-toggle-btn:hover {
+  background-color: #a5d8ff;
+  box-shadow: 0 3px 8px rgba(255, 255, 255, 0.3);
 }
 
 /* 夜间模式下的ProseMirror样式 */
