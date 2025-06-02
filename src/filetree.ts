@@ -303,8 +303,15 @@ export function switchToFileTree(): void {
     outlineContainer.style.display = 'none'
   }
   
-  // 注意：从这里移除了文件树的加载和渲染
-  // 由调用者决定何时加载和渲染文件树
+  // 加载并渲染文件树
+  loadFileTree().then(() => {
+    renderFileTree()
+  }).catch(err => {
+    console.error('加载文件树失败:', err)
+    
+    // 即使加载失败，也尝试渲染（显示空状态）
+    renderFileTree()
+  })
 }
 
 // 切换到大纲视图

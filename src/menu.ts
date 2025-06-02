@@ -14,6 +14,9 @@ export function initMenus(): void {
   const undoItem = document.getElementById('undo')
   const redoItem = document.getElementById('redo')
   
+  // 夜间模式切换按钮
+  const themeToggleBtn = document.getElementById('theme-toggle-btn')
+  
   // 菜单展开/关闭
   const allMenus = document.querySelectorAll('.menu-item')
   
@@ -71,6 +74,12 @@ export function initMenus(): void {
     const editor = getEditor()
     editor?.commands.redo()
   })
+  
+  // 夜间模式切换事件
+  themeToggleBtn?.addEventListener('click', toggleDarkMode)
+  
+  // 初始化夜间模式状态
+  initDarkMode()
 }
 
 // 初始化键盘快捷键
@@ -94,4 +103,50 @@ export function initKeyboardShortcuts(): void {
       openFolder()
     }
   })
+}
+
+// 初始化夜间模式
+function initDarkMode(): void {
+  // 从本地存储中获取夜间模式设置
+  const isDarkMode = localStorage.getItem('darkMode') === 'true'
+  
+  // 应用夜间模式设置
+  if (isDarkMode) {
+    document.body.classList.add('dark-mode')
+    updateDarkModeIcon(true)
+  } else {
+    document.body.classList.remove('dark-mode')
+    updateDarkModeIcon(false)
+  }
+}
+
+// 切换夜间模式
+function toggleDarkMode(): void {
+  const isDarkMode = document.body.classList.contains('dark-mode')
+  
+  if (isDarkMode) {
+    // 切换到亮色模式
+    document.body.classList.remove('dark-mode')
+    localStorage.setItem('darkMode', 'false')
+    updateDarkModeIcon(false)
+  } else {
+    // 切换到夜间模式
+    document.body.classList.add('dark-mode')
+    localStorage.setItem('darkMode', 'true')
+    updateDarkModeIcon(true)
+  }
+}
+
+// 更新夜间模式图标
+function updateDarkModeIcon(isDarkMode: boolean): void {
+  const themeToggleBtn = document.getElementById('theme-toggle-btn')
+  const icon = themeToggleBtn?.querySelector('i')
+  
+  if (icon) {
+    if (isDarkMode) {
+      icon.className = 'ri-sun-line' // 夜间模式下显示太阳图标
+    } else {
+      icon.className = 'ri-moon-line' // 亮色模式下显示月亮图标
+    }
+  }
 } 

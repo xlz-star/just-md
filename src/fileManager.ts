@@ -17,20 +17,24 @@ export function generateId(): string {
 
 // 检查并刷新文件树
 function refreshFileTreeIfNeeded(): void {
-  // 检查大纲面板是否固定且可见，并且在文件树视图模式下
-  const outlinePanel = document.getElementById('outline-panel')
-  if (outlinePanel && isOutlineVisible() && outlinePanel.classList.contains('pinned')) {
+  // 动态导入文件树模块
+  import('./filetree').then(filetreeModule => {
     // 检查是否处于文件树视图
     const fileTreeContainer = document.getElementById('file-tree-container')
-    if (fileTreeContainer && fileTreeContainer.style.display !== 'none') {
-      // 动态导入文件树模块并刷新
-      import('./filetree').then(filetreeModule => {
+    const outlinePanel = document.getElementById('outline-panel')
+    
+    // 如果文件树容器存在且大纲面板可见
+    if (fileTreeContainer && outlinePanel && !outlinePanel.classList.contains('hidden')) {
+      // 检查是否处于文件树视图模式（通过检查切换按钮的标题）
+      const toggleButton = document.getElementById('toggle-filetree-btn')
+      if (toggleButton && toggleButton.title === '切换到大纲视图') {
+        // 处于文件树视图，重新加载并渲染文件树
         filetreeModule.loadFileTree().then(() => {
           filetreeModule.renderFileTree()
         })
-      })
+      }
     }
-  }
+  })
 }
 
 // 打开文件
@@ -513,6 +517,13 @@ export async function openFolder(): Promise<void> {
         
         // 再等待固定操作完成
         await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      // 更新切换按钮状态，确保显示正确的图标和标题
+      const toggleButton = document.getElementById('toggle-filetree-btn');
+      if (toggleButton) {
+        toggleButton.innerHTML = '<i class="ri-list-check"></i>';
+        toggleButton.title = '切换到大纲视图';
       }
       
       // 预先加载文件树数据
