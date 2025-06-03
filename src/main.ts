@@ -7,6 +7,8 @@ import { initWordCount } from './wordCount'
 import { initThemes } from './themes'
 import { initSplitView } from './splitView'
 import { initAutoSave } from './autoSave'
+import { initCodeFolding } from './codeFolding'
+import { initPrintPreview } from './printPreview'
 import { OpenedFile } from './types'
 import { invoke } from '@tauri-apps/api/core'
 import './styles.css'
@@ -44,6 +46,12 @@ async function main() {
     
     // 初始化自动保存
     initAutoSave()
+    
+    // 初始化代码折叠
+    initCodeFolding()
+    
+    // 初始化打印预览
+    initPrintPreview()
     
     // 延迟初始化字数统计功能，确保编辑器已创建
     setTimeout(() => {

@@ -7,6 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- 添加一个简单的图标库 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+  <!-- KaTeX CSS for math formulas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 </head>
 <body>
   <div id="app">
@@ -34,6 +36,11 @@
             </div>
             <div class="dropdown-item" id="export-pdf">
               <span>导出为PDF</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" id="print-preview">
+              <span>打印预览</span>
+              <span class="shortcut">Ctrl+P</span>
             </div>
             <div class="dropdown-divider"></div>
             <div class="dropdown-item" id="exit-app">
@@ -65,6 +72,14 @@
             <div class="dropdown-item" id="insert-table">
               <span>插入表格</span>
               <span class="shortcut">Ctrl+T</span>
+            </div>
+            <div class="dropdown-item" id="insert-math-inline">
+              <span>插入行内公式</span>
+              <span class="shortcut">Ctrl+M</span>
+            </div>
+            <div class="dropdown-item" id="insert-math-block">
+              <span>插入块级公式</span>
+              <span class="shortcut">Ctrl+Shift+M</span>
             </div>
           </div>
         </div>

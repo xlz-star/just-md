@@ -5,6 +5,7 @@ import { toggleFindReplace } from './findReplace'
 import { exportToHTML, exportToPDF } from './export'
 import { showThemeSelector } from './themes'
 import { toggleSplitView } from './splitView'
+import { showPrintPreview } from './printPreview'
 
 // 初始化菜单
 export function initMenus(): void {
@@ -14,6 +15,7 @@ export function initMenus(): void {
   const saveFileItem = document.getElementById('save-file')
   const exportHtmlItem = document.getElementById('export-html')
   const exportPdfItem = document.getElementById('export-pdf')
+  const printPreviewItem = document.getElementById('print-preview')
   const exitAppItem = document.getElementById('exit-app')
   
   // 编辑菜单项
@@ -22,6 +24,8 @@ export function initMenus(): void {
   const findItem = document.getElementById('find')
   const findReplaceItem = document.getElementById('find-replace')
   const insertTableItem = document.getElementById('insert-table')
+  const insertMathInlineItem = document.getElementById('insert-math-inline')
+  const insertMathBlockItem = document.getElementById('insert-math-block')
   
   // 视图菜单项
   const toggleSplitViewItem = document.getElementById('toggle-split-view')
@@ -75,6 +79,7 @@ export function initMenus(): void {
   saveFileItem?.addEventListener('click', saveFile)
   exportHtmlItem?.addEventListener('click', exportToHTML)
   exportPdfItem?.addEventListener('click', exportToPDF)
+  printPreviewItem?.addEventListener('click', showPrintPreview)
   exitAppItem?.addEventListener('click', () => {
     exit(0)
   })
@@ -101,6 +106,16 @@ export function initMenus(): void {
   insertTableItem?.addEventListener('click', () => {
     const editor = getEditor()
     editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+  })
+  
+  insertMathInlineItem?.addEventListener('click', () => {
+    const editor = getEditor()
+    editor?.chain().focus().setMathInline('x^2 + y^2 = z^2').run()
+  })
+  
+  insertMathBlockItem?.addEventListener('click', () => {
+    const editor = getEditor()
+    editor?.chain().focus().setMathBlock('\\int_{a}^{b} f(x) dx = F(b) - F(a)').run()
   })
   
   // 视图菜单项事件
@@ -146,6 +161,20 @@ export function initKeyboardShortcuts(): void {
     if ((e.ctrlKey || e.metaKey) && e.key === '\\') {
       e.preventDefault()
       toggleSplitView()
+    }
+    
+    // Ctrl+M 插入行内公式
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'm') {
+      e.preventDefault()
+      const editor = getEditor()
+      editor?.chain().focus().setMathInline('x^2 + y^2 = z^2').run()
+    }
+    
+    // Ctrl+Shift+M 插入块级公式
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'M') {
+      e.preventDefault()
+      const editor = getEditor()
+      editor?.chain().focus().setMathBlock('\\int_{a}^{b} f(x) dx = F(b) - F(a)').run()
     }
   })
 }

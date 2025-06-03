@@ -10,6 +10,7 @@ import TableRow from '@tiptap/extension-table-row'
 import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import { SearchExtension } from './searchExtension'
+import { MathInline, MathBlock } from './mathExtension'
 import 'highlight.js/styles/github.css'
 
 // 注册常用的编程语言
@@ -116,6 +117,8 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
       TableHeader,
       TableCell,
       SearchExtension,
+      MathInline,
+      MathBlock,
     ],
     content: content || defaultContent,
     editorProps: {

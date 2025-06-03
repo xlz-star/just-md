@@ -2323,3 +2323,252 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(20px);
 }
+
+/* Math Styles */
+.math-inline {
+  display: inline-block;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.math-inline:hover {
+  background-color: rgba(25, 113, 194, 0.1);
+}
+
+.math-block {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+  cursor: pointer;
+  padding: 1em;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.math-block:hover {
+  background-color: rgba(25, 113, 194, 0.05);
+}
+
+.math-error {
+  color: #fa5252;
+  font-family: monospace;
+  background-color: #ffe0e0;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Math Editor Modal */
+.math-editor-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.math-editor-content {
+  background: var(--color-surface);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 600px;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease;
+}
+
+.math-editor-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.math-editor-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--color-text);
+}
+
+.math-editor-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.math-editor-close:hover {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+.math-editor-body {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.math-editor-input {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-text);
+  resize: vertical;
+}
+
+.math-editor-preview {
+  min-height: 100px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-background);
+  overflow-x: auto;
+}
+
+.math-editor-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.math-editor-cancel,
+.math-editor-save {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.math-editor-cancel {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.math-editor-cancel:hover {
+  background: var(--color-background);
+}
+
+.math-editor-save {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.math-editor-save:hover {
+  background: var(--color-accent);
+}
+
+/* Code Folding */
+.code-folding-btn {
+  bottom: 210px;
+  right: 20px;
+}
+
+.code-folding-btn.active {
+  background-color: var(--color-primary);
+}
+
+.code-fold-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.code-fold-button:hover {
+  background: var(--color-background);
+  color: var(--color-primary);
+}
+
+.code-block {
+  position: relative;
+}
+
+.code-block.folded pre {
+  display: none;
+}
+
+.code-fold-placeholder {
+  padding: 1em;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 0.9em;
+  color: var(--color-text-secondary);
+}
+
+.fold-preview {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text);
+}
+
+.fold-ellipsis {
+  display: block;
+  text-align: center;
+  padding: 0.5em 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* Adjust button positions */
+.split-view-btn {
+  bottom: 160px;
+}
+
+.code-folding-btn {
+  bottom: 210px;
+}
+
+.source-mode-btn {
+  bottom: 110px;
+}
+
+#theme-toggle-btn {
+  bottom: 60px;
+}
