@@ -11,6 +11,7 @@ import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import { SearchExtension } from './searchExtension'
 import { MathInline, MathBlock } from './mathExtension'
+import { Footnote } from './footnoteExtension'
 import 'highlight.js/styles/github.css'
 
 // 注册常用的编程语言
@@ -119,6 +120,7 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
       SearchExtension,
       MathInline,
       MathBlock,
+      Footnote,
     ],
     content: content || defaultContent,
     editorProps: {

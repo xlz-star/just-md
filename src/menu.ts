@@ -6,6 +6,7 @@ import { exportToHTML, exportToPDF } from './export'
 import { showThemeSelector } from './themes'
 import { toggleSplitView } from './splitView'
 import { showPrintPreview } from './printPreview'
+import { toggleFocusMode, toggleTypewriterMode } from './focusMode'
 
 // 初始化菜单
 export function initMenus(): void {
@@ -26,10 +27,13 @@ export function initMenus(): void {
   const insertTableItem = document.getElementById('insert-table')
   const insertMathInlineItem = document.getElementById('insert-math-inline')
   const insertMathBlockItem = document.getElementById('insert-math-block')
+  const insertFootnoteItem = document.getElementById('insert-footnote')
   
   // 视图菜单项
   const toggleSplitViewItem = document.getElementById('toggle-split-view')
   const selectThemeItem = document.getElementById('select-theme')
+  const toggleFocusModeItem = document.getElementById('toggle-focus-mode')
+  const toggleTypewriterModeItem = document.getElementById('toggle-typewriter-mode')
   
   // 夜间模式切换按钮
   const themeToggleBtn = document.getElementById('theme-toggle-btn')
@@ -118,9 +122,19 @@ export function initMenus(): void {
     editor?.chain().focus().setMathBlock('\\int_{a}^{b} f(x) dx = F(b) - F(a)').run()
   })
   
+  insertFootnoteItem?.addEventListener('click', () => {
+    const editor = getEditor()
+    const footnoteContent = prompt('请输入脚注内容:')
+    if (footnoteContent) {
+      editor?.chain().focus().setFootnote('', footnoteContent).run()
+    }
+  })
+  
   // 视图菜单项事件
   toggleSplitViewItem?.addEventListener('click', toggleSplitView)
   selectThemeItem?.addEventListener('click', showThemeSelector)
+  toggleFocusModeItem?.addEventListener('click', toggleFocusMode)
+  toggleTypewriterModeItem?.addEventListener('click', toggleTypewriterMode)
   
   // 夜间模式切换事件
   themeToggleBtn?.addEventListener('click', showThemeSelector)

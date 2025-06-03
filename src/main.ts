@@ -9,6 +9,8 @@ import { initSplitView } from './splitView'
 import { initAutoSave } from './autoSave'
 import { initCodeFolding } from './codeFolding'
 import { initPrintPreview } from './printPreview'
+import { initTocGenerator } from './tocGenerator'
+import { initFocusMode } from './focusMode'
 import { OpenedFile } from './types'
 import { invoke } from '@tauri-apps/api/core'
 import './styles.css'
@@ -52,6 +54,12 @@ async function main() {
     
     // 初始化打印预览
     initPrintPreview()
+    
+    // 初始化目录生成器
+    initTocGenerator()
+    
+    // 初始化专注模式和打字机模式
+    initFocusMode()
     
     // 延迟初始化字数统计功能，确保编辑器已创建
     setTimeout(() => {
