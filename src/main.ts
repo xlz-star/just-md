@@ -2,6 +2,8 @@ import { initEditor, initDragAndDrop, setEditorContent, setCurrentFile, toggleSo
 import { initOutlineFeature, resetOutlineState, updateOutlineIfNeeded } from './outline'
 import { initMenus, initKeyboardShortcuts } from './menu'
 import { handleFileDrop, saveFile, addFileTab, generateId } from './fileManager'
+import { initFindReplace } from './findReplace'
+import { initWordCount } from './wordCount'
 import { OpenedFile } from './types'
 import { invoke } from '@tauri-apps/api/core'
 import './styles.css'
@@ -27,6 +29,14 @@ async function main() {
 
     // 初始化键盘快捷键
     initKeyboardShortcuts()
+    
+    // 初始化查找替换功能
+    initFindReplace()
+    
+    // 延迟初始化字数统计功能，确保编辑器已创建
+    setTimeout(() => {
+      initWordCount()
+    }, 100)
 
     // 添加窗口关闭事件处理，保存当前文件
     window.addEventListener('beforeunload', () => {

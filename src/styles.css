@@ -1543,3 +1543,363 @@ body.dark-mode .table-toolbar button:hover {
   color: #74c0fc;
   border-color: #74c0fc;
 }
+
+/* Find/Replace Panel */
+.find-replace-panel {
+  position: fixed;
+  top: 38px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  width: 520px;
+  max-width: 90vw;
+  transition: all 0.2s ease;
+}
+
+.find-replace-panel.hidden {
+  display: none;
+}
+
+body.dark-mode .find-replace-panel {
+  background: #2d2d2d;
+  border: 1px solid #444;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.find-replace-content {
+  padding: 12px;
+}
+
+.find-replace-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.find-replace-row:last-child {
+  margin-bottom: 0;
+}
+
+.find-replace-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.find-replace-input:focus {
+  border-color: #1971c2;
+}
+
+body.dark-mode .find-replace-input {
+  background: #1a1a1a;
+  color: #e0e0e0;
+  border: 1px solid #444;
+}
+
+body.dark-mode .find-replace-input:focus {
+  border-color: #74c0fc;
+}
+
+.match-count {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #6c757d;
+  background: #f8f9fa;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+body.dark-mode .match-count {
+  color: #adb5bd;
+  background: #3a3a3a;
+}
+
+.find-replace-btn {
+  padding: 6px 10px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #495057;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.find-replace-btn:hover {
+  background: #e9ecef;
+  color: #1971c2;
+  border-color: #1971c2;
+}
+
+body.dark-mode .find-replace-btn {
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border: 1px solid #444;
+}
+
+body.dark-mode .find-replace-btn:hover {
+  background: #4a4a4a;
+  color: #74c0fc;
+  border-color: #74c0fc;
+}
+
+.find-replace-options {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e9ecef;
+}
+
+body.dark-mode .find-replace-options {
+  border-top: 1px solid #444;
+}
+
+.find-replace-options label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #495057;
+  cursor: pointer;
+}
+
+body.dark-mode .find-replace-options label {
+  color: #e0e0e0;
+}
+
+.find-replace-options input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Search match highlighting */
+.ProseMirror .search-match {
+  background-color: #ffeb3b;
+  color: #000;
+}
+
+.ProseMirror .search-match.active {
+  background-color: #ff9800;
+  color: #fff;
+}
+
+body.dark-mode .ProseMirror .search-match {
+  background-color: #795548;
+  color: #fff;
+}
+
+body.dark-mode .ProseMirror .search-match.active {
+  background-color: #ff9800;
+  color: #000;
+}
+
+/* Word Count */
+.word-count {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  padding: 6px 16px;
+  font-size: 12px;
+  color: #6c757d;
+  z-index: 50;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.word-count:hover {
+  background: #e9ecef;
+}
+
+body.dark-mode .word-count {
+  background: #252525;
+  border-top: 1px solid #444;
+  color: #adb5bd;
+}
+
+body.dark-mode .word-count:hover {
+  background: #2a2a2a;
+}
+
+.word-count-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+
+.word-count-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.word-count-item i {
+  font-size: 14px;
+}
+
+.word-count-separator {
+  color: #dee2e6;
+}
+
+body.dark-mode .word-count-separator {
+  color: #444;
+}
+
+.word-count.hidden {
+  display: none;
+}
+
+/* Statistics Modal */
+.stats-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.stats-modal-content {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px;
+  animation: slideIn 0.3s ease;
+}
+
+body.dark-mode .stats-modal-content {
+  background: #2d2d2d;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.stats-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+body.dark-mode .stats-modal-header {
+  border-bottom: 1px solid #444;
+}
+
+.stats-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+body.dark-mode .stats-modal-header h3 {
+  color: #e0e0e0;
+}
+
+.stats-modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.stats-modal-close:hover {
+  background-color: #f1f3f5;
+  color: #333;
+}
+
+body.dark-mode .stats-modal-close {
+  color: #adb5bd;
+}
+
+body.dark-mode .stats-modal-close:hover {
+  background-color: #3a3a3a;
+  color: #e0e0e0;
+}
+
+.stats-modal-body {
+  padding: 20px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.stats-item {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  text-align: center;
+}
+
+body.dark-mode .stats-item {
+  background: #1a1a1a;
+}
+
+.stats-label {
+  font-size: 12px;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+body.dark-mode .stats-label {
+  color: #adb5bd;
+}
+
+.stats-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+body.dark-mode .stats-value {
+  color: #e0e0e0;
+}
+
+/* Adjust editor bottom padding for word count */
+#editor {
+  padding-bottom: 50px;
+}
+
+/* Adjust floating buttons position */
+.floating-btn {
+  bottom: 60px;
+}
+
+#theme-toggle-btn {
+  bottom: 60px;
+}
+
+.source-mode-btn {
+  bottom: 110px;
+}

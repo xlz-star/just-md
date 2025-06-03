@@ -1,6 +1,7 @@
 import { exit } from '@tauri-apps/plugin-process'
 import { openFile, saveFile, openFolder } from './fileManager'
 import { getEditor } from './editor'
+import { toggleFindReplace } from './findReplace'
 
 // 初始化菜单
 export function initMenus(): void {
@@ -13,6 +14,8 @@ export function initMenus(): void {
   // 编辑菜单项
   const undoItem = document.getElementById('undo')
   const redoItem = document.getElementById('redo')
+  const findItem = document.getElementById('find')
+  const findReplaceItem = document.getElementById('find-replace')
   const insertTableItem = document.getElementById('insert-table')
   
   // 夜间模式切换按钮
@@ -74,6 +77,14 @@ export function initMenus(): void {
   redoItem?.addEventListener('click', () => {
     const editor = getEditor()
     editor?.commands.redo()
+  })
+  
+  findItem?.addEventListener('click', () => {
+    toggleFindReplace(false)
+  })
+  
+  findReplaceItem?.addEventListener('click', () => {
+    toggleFindReplace(true)
   })
   
   insertTableItem?.addEventListener('click', () => {
