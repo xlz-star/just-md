@@ -113,7 +113,10 @@ export async function saveFile(): Promise<void> {
   try {
     const currentFilePath = getCurrentFilePath()
     
-    if (!currentFilePath || currentFilePath === getCurrentFilePath()) {
+    // 判断是否需要打开保存对话框：
+    // 1. 没有当前文件路径
+    // 2. 路径不包含路径分隔符（表示是拖放的文件，只有文件名）
+    if (!currentFilePath || (!currentFilePath.includes('/') && !currentFilePath.includes('\\'))) {
       // 如果没有当前文件路径或路径只是文件名（拖放的文件），打开保存对话框
       const savePath = await save({
         filters: [{

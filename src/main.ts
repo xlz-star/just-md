@@ -1,7 +1,9 @@
-import { initEditor, initDragAndDrop } from './editor'
-import { initOutlineFeature } from './outline'
+import { initEditor, initDragAndDrop, setEditorContent, setCurrentFile } from './editor'
+import { initOutlineFeature, resetOutlineState, updateOutlineIfNeeded } from './outline'
 import { initMenus, initKeyboardShortcuts } from './menu'
-import { handleFileDrop, saveFile } from './fileManager'
+import { handleFileDrop, saveFile, addFileTab, generateId } from './fileManager'
+import { OpenedFile } from './types'
+import { invoke } from '@tauri-apps/api/core'
 import './styles.css'
 
 // 应用程序入口函数
@@ -30,6 +32,60 @@ async function main() {
     window.addEventListener('beforeunload', () => {
       saveFile().catch((err: Error) => console.error('保存失败:', err))
     })
+
+    // 检查是否有通过命令行参数传入的文件路径
+    try {
+      const initialFile = await invoke<string | null>('get_initial_file')
+      if (initialFile) {
+        // 从路径中提取文件名
+        const pathParts = initialFile.split(/[/\\]/)
+        const fileName = pathParts[pathParts.length - 1]
+        
+        try {
+          // 读取渲染后的HTML内容用于显示
+          const htmlContent = await invoke<string>('read_markdown', { path: initialFile })
+          
+          // 同时获取原始Markdown内容用于保存
+          const markdownContent = await invoke<string>('get_raw_markdown', { path: initialFile })
+          
+          if (htmlContent && markdownContent) {
+            // 创建文件对象，保存原始Markdown内容
+            const file: OpenedFile = {
+              id: generateId(),
+              path: initialFile,
+              name: fileName,
+              content: markdownContent, // 保存原始Markdown
+              isDirty: false
+            }
+            
+            // 添加到标签列表并设置编辑器内容
+            addFileTab(file, false) // 先添加到标签，但不激活
+            
+            // 手动设置当前文件信息
+            setCurrentFile(file.path, file.name)
+            
+            // 重置大纲结构
+            resetOutlineState()
+            
+            // 设置编辑器内容为渲染后的HTML
+            setEditorContent(htmlContent)
+            
+            // 确保编辑器内容不是默认样式
+            const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
+            if (proseMirror) {
+              proseMirror.classList.remove('using-default-content')
+            }
+            
+            // 更新大纲
+            updateOutlineIfNeeded()
+          }
+        } catch (err) {
+          console.error('读取初始文件内容失败:', err)
+        }
+      }
+    } catch (err) {
+      console.error('获取初始文件失败:', err)
+    }
 
     // 其他样式初始化
     document.head.insertAdjacentHTML('beforeend', `
