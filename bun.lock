@@ -12,6 +12,11 @@
         "@tiptap/core": "^2.12.0",
         "@tiptap/extension-code-block-lowlight": "^2.12.0",
         "@tiptap/extension-image": "^2.12.0",
+        "@tiptap/extension-link": "^2.12.0",
+        "@tiptap/extension-table": "^2.12.0",
+        "@tiptap/extension-table-cell": "^2.12.0",
+        "@tiptap/extension-table-header": "^2.12.0",
+        "@tiptap/extension-table-row": "^2.12.0",
         "@tiptap/pm": "^2.12.0",
         "@tiptap/starter-kit": "^2.12.0",
         "highlight.js": "^11.11.1",
@@ -184,6 +189,8 @@
 
     "@tiptap/extension-italic": ["@tiptap/extension-italic@2.12.0", "https://registry.npmmirror.com/@tiptap/extension-italic/-/extension-italic-2.12.0.tgz", { "peerDependencies": { "@tiptap/core": "^2.7.0" } }, "sha512-JKcXK3LmEsmxNzEq5e06rPUGMRLUxmJ2mYtBY4NlJ6yLM9XMDljtgeTnWT0ySLYmfINSFTkX4S7WIRbpl9l4pw=="],
 
+    "@tiptap/extension-link": ["@tiptap/extension-link@2.12.0", "http://mirrors.cloud.tencent.com/npm/@tiptap/extension-link/-/extension-link-2.12.0.tgz", { "dependencies": { "linkifyjs": "^4.2.0" }, "peerDependencies": { "@tiptap/core": "^2.7.0", "@tiptap/pm": "^2.7.0" } }, "sha512-N6f78F2onvcL8FAwFOJexOF02UwGETLjQ7cCguhBe/w7vtx7aX8/f+IlaSGY/pIcWyEQpoC28ciM0+QsrJRr1A=="],
+
     "@tiptap/extension-list-item": ["@tiptap/extension-list-item@2.12.0", "https://registry.npmmirror.com/@tiptap/extension-list-item/-/extension-list-item-2.12.0.tgz", { "peerDependencies": { "@tiptap/core": "^2.7.0" } }, "sha512-4YwZooC8HP+gPxs6YrkB1ayggyYbgVvJx/rWBT6lKSW2MVVg8QXi1zAcSI3MhIhHmqDysXXFPL8JURlbeGjaFA=="],
 
     "@tiptap/extension-ordered-list": ["@tiptap/extension-ordered-list@2.12.0", "https://registry.npmmirror.com/@tiptap/extension-ordered-list/-/extension-ordered-list-2.12.0.tgz", { "peerDependencies": { "@tiptap/core": "^2.7.0" } }, "sha512-1ys0e/oqk09oXxrB1WzAx5EntK/QreObG/V1yhgihGm429fxHMsxzIYN6dKAYxx0YOPQG7qEZRrrPuWU70Ms7g=="],
@@ -191,6 +198,14 @@
     "@tiptap/extension-paragraph": ["@tiptap/extension-paragraph@2.12.0", "https://registry.npmmirror.com/@tiptap/extension-paragraph/-/extension-paragraph-2.12.0.tgz", { "peerDependencies": { "@tiptap/core": "^2.7.0" } }, "sha512-QNK5cgewCunWFxpLlbvvoO1rrLgEtNKxiY79fctP9toV+e59R+1i1Q9lXC1O5mOfDgVxCb6uFDMsqmKhFjpPog=="],
 
     "@tiptap/extension-strike": ["@tiptap/extension-strike@2.12.0", "https://registry.npmmirror.com/@tiptap/extension-strike/-/extension-strike-2.12.0.tgz", { "peerDependencies": { "@tiptap/core": "^2.7.0" } }, "sha512-nBaa5YtBsLJPZFfSs36sBz4Zgi/c8b3MsmS/Az8uXaHb0R9yPewOVUMDIQbxMct8SXUlIo9VtKlOL+mVJ3Nkpw=="],
+
+    "@tiptap/extension-table": ["@tiptap/extension-table@2.12.0", "http://mirrors.cloud.tencent.com/npm/@tiptap/extension-table/-/extension-table-2.12.0.tgz", { "peerDependencies": { "@tiptap/core": "^2.7.0", "@tiptap/pm": "^2.7.0" } }, "sha512-tT3IbbBal0vPQ1Bc/3Xl+tmqqZQCYWxnycBPl/WZBqhd57DWzfJqRPESwCGUIJgjOtTnipy/ulvj0FxHi1j9JA=="],
+
+    "@tiptap/extension-table-cell": ["@tiptap/extension-table-cell@2.12.0", "http://mirrors.cloud.tencent.com/npm/@tiptap/extension-table-cell/-/extension-table-cell-2.12.0.tgz", { "peerDependencies": { "@tiptap/core": "^2.7.0" } }, "sha512-8i35uCkmkSiQxMiZ+DLgT/wj24P5U/Zo3jr1e0tMAAMG7sRO1MljjLmkpV8WCdBo0xoRqzkz4J7Nkq+DtzZv9Q=="],
+
+    "@tiptap/extension-table-header": ["@tiptap/extension-table-header@2.12.0", "http://mirrors.cloud.tencent.com/npm/@tiptap/extension-table-header/-/extension-table-header-2.12.0.tgz", { "peerDependencies": { "@tiptap/core": "^2.7.0" } }, "sha512-gRKEsy13KKLpg9RxyPeUGqh4BRFSJ2Bc2KQP1ldhef6CPRYHCbGycxXCVQ5aAb7Mhpo54L+AAkmAv1iMHUTflw=="],
+
+    "@tiptap/extension-table-row": ["@tiptap/extension-table-row@2.12.0", "http://mirrors.cloud.tencent.com/npm/@tiptap/extension-table-row/-/extension-table-row-2.12.0.tgz", { "peerDependencies": { "@tiptap/core": "^2.7.0" } }, "sha512-AEW/Zl9V0IoaYDBLMhF5lVl0xgoIJs3IuKCsIYxGDlxBfTVFC6PfQzvuy296CMjO5ZcZ0xalVipPV9ggsMRD+w=="],
 
     "@tiptap/extension-text": ["@tiptap/extension-text@2.12.0", "https://registry.npmmirror.com/@tiptap/extension-text/-/extension-text-2.12.0.tgz", { "peerDependencies": { "@tiptap/core": "^2.7.0" } }, "sha512-0ytN9V1tZYTXdiYDQg4FB2SQ56JAJC9r/65snefb9ztl+gZzDrIvih7CflHs1ic9PgyjexfMLeH+VzuMccNyZw=="],
 
@@ -235,6 +250,8 @@
     "highlight.js": ["highlight.js@11.11.1", "https://registry.npmmirror.com/highlight.js/-/highlight.js-11.11.1.tgz", {}, "sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w=="],
 
     "linkify-it": ["linkify-it@5.0.0", "https://registry.npmmirror.com/linkify-it/-/linkify-it-5.0.0.tgz", { "dependencies": { "uc.micro": "^2.0.0" } }, "sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ=="],
+
+    "linkifyjs": ["linkifyjs@4.3.1", "http://mirrors.cloud.tencent.com/npm/linkifyjs/-/linkifyjs-4.3.1.tgz", {}, "sha512-DRSlB9DKVW04c4SUdGvKK5FR6be45lTU9M76JnngqPeeGDqPwYc0zdUErtsNVMtxPXgUWV4HbXbnC4sNyBxkYg=="],
 
     "lowlight": ["lowlight@3.3.0", "https://registry.npmmirror.com/lowlight/-/lowlight-3.3.0.tgz", { "dependencies": { "@types/hast": "^3.0.0", "devlop": "^1.0.0", "highlight.js": "~11.11.0" } }, "sha512-0JNhgFoPvP6U6lE/UdVsSq99tn6DhjjpAj5MxG49ewd2mOBVtwWYIT8ClyABhq198aXXODMU6Ox8DrGy/CpTZQ=="],
 

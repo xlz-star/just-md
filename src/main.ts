@@ -1,4 +1,4 @@
-import { initEditor, initDragAndDrop, setEditorContent, setCurrentFile } from './editor'
+import { initEditor, initDragAndDrop, setEditorContent, setCurrentFile, toggleSourceMode } from './editor'
 import { initOutlineFeature, resetOutlineState, updateOutlineIfNeeded } from './outline'
 import { initMenus, initKeyboardShortcuts } from './menu'
 import { handleFileDrop, saveFile, addFileTab, generateId } from './fileManager'
@@ -67,8 +67,8 @@ async function main() {
             // 重置大纲结构
             resetOutlineState()
             
-            // 设置编辑器内容为渲染后的HTML
-            setEditorContent(htmlContent)
+            // 设置编辑器内容为渲染后的HTML，同时保存原始Markdown
+            setEditorContent(htmlContent, markdownContent)
             
             // 确保编辑器内容不是默认样式
             const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
@@ -85,6 +85,14 @@ async function main() {
       }
     } catch (err) {
       console.error('获取初始文件失败:', err)
+    }
+
+    // 初始化源代码模式切换按钮
+    const sourceModeBtn = document.getElementById('source-mode-btn')
+    if (sourceModeBtn) {
+      sourceModeBtn.addEventListener('click', () => {
+        toggleSourceMode()
+      })
     }
 
     // 其他样式初始化

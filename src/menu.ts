@@ -13,6 +13,7 @@ export function initMenus(): void {
   // 编辑菜单项
   const undoItem = document.getElementById('undo')
   const redoItem = document.getElementById('redo')
+  const insertTableItem = document.getElementById('insert-table')
   
   // 夜间模式切换按钮
   const themeToggleBtn = document.getElementById('theme-toggle-btn')
@@ -75,6 +76,11 @@ export function initMenus(): void {
     editor?.commands.redo()
   })
   
+  insertTableItem?.addEventListener('click', () => {
+    const editor = getEditor()
+    editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+  })
+  
   // 夜间模式切换事件
   themeToggleBtn?.addEventListener('click', toggleDarkMode)
   
@@ -101,6 +107,13 @@ export function initKeyboardShortcuts(): void {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault()
       openFolder()
+    }
+    
+    // Ctrl+T 插入表格
+    if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+      e.preventDefault()
+      const editor = getEditor()
+      editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
     }
   })
 }

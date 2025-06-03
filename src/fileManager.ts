@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { open, save } from '@tauri-apps/plugin-dialog'
 import { OpenedFile } from './types'
-import { getEditorContent, setEditorContent, setCurrentFile, getCurrentFilePath } from './editor'
+import { getEditorContent, setEditorContent, setCurrentFile, getCurrentFilePath, getCurrentMarkdownContent } from './editor'
 import { resetOutlineState, updateOutlineIfNeeded } from './outline'
 
 // 动态导入以避免循环引用
@@ -79,8 +79,8 @@ export async function openFile(): Promise<void> {
           // 重置大纲结构
           resetOutlineState()
           
-          // 设置编辑器内容为渲染后的HTML
-          setEditorContent(htmlContent)
+          // 设置编辑器内容为渲染后的HTML，同时传入原始Markdown
+          setEditorContent(htmlContent, markdownContent)
           
           // 确保编辑器内容不是默认样式
           const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
@@ -168,8 +168,8 @@ export async function saveFile(): Promise<void> {
       }
     }
     
-    // 获取编辑器内容
-    const content = getEditorContent()
+    // 获取要保存的Markdown内容
+    const content = getCurrentMarkdownContent()
     
     // 保存到文件
     await invoke('save_markdown', {
@@ -274,12 +274,12 @@ export async function switchToFile(index: number): Promise<void> {
     // 渲染Markdown内容为HTML
     const htmlContent = await invoke<string>('render_markdown_to_html', { markdown: file.content })
     
-    // 更新编辑器内容为渲染后的HTML
-    setEditorContent(htmlContent)
+    // 更新编辑器内容为渲染后的HTML，同时传入原始Markdown
+    setEditorContent(htmlContent, file.content)
   } catch (err) {
     console.error('渲染Markdown失败:', err)
     // 如果渲染失败，使用原始内容
-    setEditorContent(file.content)
+    setEditorContent(file.content, file.content)
   }
   
   // 确保编辑器内容不是默认样式
@@ -325,7 +325,7 @@ export function closeFile(index: number): void {
     } else {
       // 没有打开的文件，清空编辑器
       setCurrentFile(null, null)
-      setEditorContent('')
+      setEditorContent('', '')
       
       // 刷新文件树（如果需要）
       refreshFileTreeIfNeeded()
@@ -340,7 +340,7 @@ export function closeFile(index: number): void {
 export function saveCurrentFileContent(): void {
   const currentFilePath = getCurrentFilePath()
   if (currentFilePath) {
-    const content = getEditorContent()
+    const content = getCurrentMarkdownContent()
     
     // 更新文件内容
     const index = openedFiles.findIndex(f => f.path === currentFilePath)
@@ -446,8 +446,8 @@ export function handleFileDrop(file: File): void {
         // 重置大纲结构
         resetOutlineState()
         
-        // 设置编辑器内容为渲染后的HTML
-        setEditorContent(htmlContent)
+        // 设置编辑器内容为渲染后的HTML，同时传入原始Markdown
+        setEditorContent(htmlContent, markdownContent)
         
         // 确保编辑器内容不是默认样式
         const proseMirror = document.querySelector('.ProseMirror') as HTMLElement

@@ -1144,11 +1144,32 @@ body.dark-mode .outline-h6 {
   margin: 1em 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: block;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ProseMirror img.markdown-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .ProseMirror img.markdown-image.ProseMirror-selectednode {
   outline: 2px solid #1971c2;
   outline-offset: 2px;
+}
+
+/* Markdown链接样式 */
+.ProseMirror a.markdown-link {
+  color: #1971c2;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.ProseMirror a.markdown-link:hover {
+  color: #1864ab;
+  text-decoration: underline;
 }
 
 /* 夜间模式图片样式 */
@@ -1159,4 +1180,366 @@ body.dark-mode .ProseMirror img.markdown-image {
 
 body.dark-mode .ProseMirror img.markdown-image.ProseMirror-selectednode {
   outline: 2px solid #74c0fc;
+}
+
+body.dark-mode .ProseMirror a.markdown-link {
+  color: #74c0fc;
+}
+
+body.dark-mode .ProseMirror a.markdown-link:hover {
+  color: #a5d8ff;
+}
+
+/* 源代码编辑器样式 */
+.source-editor {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Source Code Pro', Menlo, Monaco, 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  background-color: #fff;
+  color: #333;
+  border: none;
+  outline: none;
+  resize: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode .source-editor {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* 源代码对话框样式 */
+.source-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.source-dialog-content {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+body.dark-mode .source-dialog-content {
+  background-color: #2d2d2d;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.source-dialog-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+body.dark-mode .source-dialog-header {
+  border-bottom: 1px solid #444;
+}
+
+.source-dialog-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+body.dark-mode .source-dialog-header h3 {
+  color: #e0e0e0;
+}
+
+.source-dialog-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.source-dialog-close:hover {
+  background-color: #f1f3f5;
+  color: #333;
+}
+
+body.dark-mode .source-dialog-close {
+  color: #adb5bd;
+}
+
+body.dark-mode .source-dialog-close:hover {
+  background-color: #3a3a3a;
+  color: #e0e0e0;
+}
+
+.source-dialog-body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.source-dialog-body textarea {
+  flex: 1;
+  padding: 12px;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Source Code Pro', Menlo, Monaco, 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  color: #333;
+  resize: none;
+  outline: none;
+  min-height: 150px;
+}
+
+body.dark-mode .source-dialog-body textarea {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  border: 1px solid #444;
+}
+
+.source-dialog-edit {
+  align-self: flex-end;
+  padding: 8px 16px;
+  background-color: #1971c2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.source-dialog-edit:hover {
+  background-color: #1864ab;
+}
+
+/* 源代码模式切换按钮 */
+.source-mode-btn {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1971c2;
+  color: white;
+  border: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.source-mode-btn:hover {
+  background-color: #1864ab;
+  transform: scale(1.05);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.source-mode-btn:active {
+  transform: scale(0.95);
+}
+
+body.dark-mode .source-mode-btn {
+  background-color: #74c0fc;
+  color: #1a1a1a;
+}
+
+body.dark-mode .source-mode-btn:hover {
+  background-color: #a5d8ff;
+}
+
+/* 代码块提示样式 */
+.ProseMirror .code-block {
+  position: relative;
+}
+
+.ProseMirror .code-block:hover::after {
+  content: '按住 Alt 键点击查看源代码';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 12px;
+  color: #666;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+body.dark-mode .ProseMirror .code-block:hover::after {
+  color: #adb5bd;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* 表格样式 */
+.ProseMirror table.markdown-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 1em 0;
+  overflow: hidden;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+.ProseMirror table.markdown-table td,
+.ProseMirror table.markdown-table th {
+  min-width: 1em;
+  border: 1px solid #dee2e6;
+  padding: 8px 12px;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.ProseMirror table.markdown-table th {
+  font-weight: 600;
+  text-align: left;
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+.ProseMirror table.markdown-table .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(25, 113, 194, 0.15);
+  pointer-events: none;
+}
+
+.ProseMirror table.markdown-table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: #1971c2;
+  pointer-events: none;
+}
+
+/* 夜间模式表格样式 */
+body.dark-mode .ProseMirror table.markdown-table {
+  border: 1px solid #444;
+}
+
+body.dark-mode .ProseMirror table.markdown-table td,
+body.dark-mode .ProseMirror table.markdown-table th {
+  border: 1px solid #444;
+}
+
+body.dark-mode .ProseMirror table.markdown-table th {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+}
+
+body.dark-mode .ProseMirror table.markdown-table .selectedCell:after {
+  background: rgba(116, 192, 252, 0.15);
+}
+
+body.dark-mode .ProseMirror table.markdown-table .column-resize-handle {
+  background-color: #74c0fc;
+}
+
+/* 表格工具栏 */
+.table-toolbar {
+  position: fixed;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  display: none;
+  gap: 4px;
+}
+
+.table-toolbar.active {
+  display: flex;
+}
+
+.table-toolbar button {
+  padding: 4px 8px;
+  background: none;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #495057;
+  transition: all 0.2s ease;
+}
+
+.table-toolbar button:hover {
+  background-color: #f1f3f5;
+  color: #1971c2;
+  border-color: #1971c2;
+}
+
+body.dark-mode .table-toolbar {
+  background: #2d2d2d;
+  border: 1px solid #444;
+}
+
+body.dark-mode .table-toolbar button {
+  color: #e0e0e0;
+  border: 1px solid #444;
+}
+
+body.dark-mode .table-toolbar button:hover {
+  background-color: #3a3a3a;
+  color: #74c0fc;
+  border-color: #74c0fc;
 }
