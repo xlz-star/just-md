@@ -4,6 +4,9 @@ import { initMenus, initKeyboardShortcuts } from './menu'
 import { handleFileDrop, saveFile, addFileTab, generateId } from './fileManager'
 import { initFindReplace } from './findReplace'
 import { initWordCount } from './wordCount'
+import { initThemes } from './themes'
+import { initSplitView } from './splitView'
+import { initAutoSave } from './autoSave'
 import { OpenedFile } from './types'
 import { invoke } from '@tauri-apps/api/core'
 import './styles.css'
@@ -32,6 +35,15 @@ async function main() {
     
     // 初始化查找替换功能
     initFindReplace()
+    
+    // 初始化主题系统
+    initThemes()
+    
+    // 初始化分屏视图
+    initSplitView()
+    
+    // 初始化自动保存
+    initAutoSave()
     
     // 延迟初始化字数统计功能，确保编辑器已创建
     setTimeout(() => {

@@ -276,6 +276,14 @@ fn render_markdown_to_html(markdown: &str) -> String {
     convert_markdown_to_html(markdown)
 }
 
+// 导出为PDF（简单实现，通过HTML）
+#[tauri::command]
+fn export_to_pdf(markdown: &str, output_path: &str) -> Result<(), String> {
+    // 暂时返回错误，提示需要外部工具
+    // 在实际应用中，可以使用wkhtmltopdf或其他PDF生成库
+    Err("PDF导出功能需要安装额外的依赖。请先导出为HTML，然后使用浏览器的打印功能保存为PDF。".to_string())
+}
+
 // 处理命令行参数
 #[tauri::command]
 fn get_cli_args() -> Vec<String> {
@@ -346,6 +354,7 @@ fn main() {
             get_directory_children,
             get_raw_markdown,
             render_markdown_to_html,
+            export_to_pdf,
             set_current_directory,
             get_cli_args,
             get_initial_file

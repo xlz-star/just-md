@@ -2,6 +2,9 @@ import { exit } from '@tauri-apps/plugin-process'
 import { openFile, saveFile, openFolder } from './fileManager'
 import { getEditor } from './editor'
 import { toggleFindReplace } from './findReplace'
+import { exportToHTML, exportToPDF } from './export'
+import { showThemeSelector } from './themes'
+import { toggleSplitView } from './splitView'
 
 // 初始化菜单
 export function initMenus(): void {
@@ -9,6 +12,8 @@ export function initMenus(): void {
   const openFileItem = document.getElementById('open-file')
   const openFolderItem = document.getElementById('open-folder')
   const saveFileItem = document.getElementById('save-file')
+  const exportHtmlItem = document.getElementById('export-html')
+  const exportPdfItem = document.getElementById('export-pdf')
   const exitAppItem = document.getElementById('exit-app')
   
   // 编辑菜单项
@@ -17,6 +22,10 @@ export function initMenus(): void {
   const findItem = document.getElementById('find')
   const findReplaceItem = document.getElementById('find-replace')
   const insertTableItem = document.getElementById('insert-table')
+  
+  // 视图菜单项
+  const toggleSplitViewItem = document.getElementById('toggle-split-view')
+  const selectThemeItem = document.getElementById('select-theme')
   
   // 夜间模式切换按钮
   const themeToggleBtn = document.getElementById('theme-toggle-btn')
@@ -64,6 +73,8 @@ export function initMenus(): void {
   openFileItem?.addEventListener('click', openFile)
   openFolderItem?.addEventListener('click', openFolder)
   saveFileItem?.addEventListener('click', saveFile)
+  exportHtmlItem?.addEventListener('click', exportToHTML)
+  exportPdfItem?.addEventListener('click', exportToPDF)
   exitAppItem?.addEventListener('click', () => {
     exit(0)
   })
@@ -92,8 +103,12 @@ export function initMenus(): void {
     editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
   })
   
+  // 视图菜单项事件
+  toggleSplitViewItem?.addEventListener('click', toggleSplitView)
+  selectThemeItem?.addEventListener('click', showThemeSelector)
+  
   // 夜间模式切换事件
-  themeToggleBtn?.addEventListener('click', toggleDarkMode)
+  themeToggleBtn?.addEventListener('click', showThemeSelector)
   
   // 初始化夜间模式状态
   initDarkMode()
@@ -125,6 +140,12 @@ export function initKeyboardShortcuts(): void {
       e.preventDefault()
       const editor = getEditor()
       editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+    }
+    
+    // Ctrl+\ 切换分屏视图
+    if ((e.ctrlKey || e.metaKey) && e.key === '\\') {
+      e.preventDefault()
+      toggleSplitView()
     }
   })
 }
