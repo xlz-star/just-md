@@ -3,6 +3,7 @@ import StarterKit from '@tiptap/starter-kit'
 import { updateOutlineIfNeeded } from './outline.ts'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { common, createLowlight } from 'lowlight'
+import Image from '@tiptap/extension-image'
 import 'highlight.js/styles/github.css'
 
 // 注册常用的编程语言
@@ -64,6 +65,13 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
           class: 'code-block',
         },
       }),
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'markdown-image',
+        },
+      }),
     ],
     content: content || defaultContent,
     editorProps: {
@@ -72,8 +80,10 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
       },
     },
     onSelectionUpdate: () => {
-      // 触发大纲更新
-      updateOutlineIfNeeded()
+      // 使用requestAnimationFrame优化性能
+      requestAnimationFrame(() => {
+        updateOutlineIfNeeded()
+      })
     },
   })
   
@@ -85,6 +95,9 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
     }
   }
   
+  // 防抖计时器
+  let updateDebounceTimer: number | null = null
+  
   // 监听编辑器内容变化
   editor.on('update', () => {
     // 如果设置了内容变化回调，调用它
@@ -92,8 +105,15 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
       onContentChange(true)
     }
     
-    // 触发大纲更新
-    updateOutlineIfNeeded()
+    // 使用防抖触发大纲更新，避免频繁更新
+    if (updateDebounceTimer !== null) {
+      clearTimeout(updateDebounceTimer)
+    }
+    
+    updateDebounceTimer = setTimeout(() => {
+      updateOutlineIfNeeded()
+      updateDebounceTimer = null
+    }, 100) as unknown as number
   })
   
   // 添加焦点事件处理

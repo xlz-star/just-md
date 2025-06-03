@@ -10,6 +10,8 @@ import { setCurrentFile } from './editor'
 let isFileTreeVisible = false
 let fileTreeData: FileTreeItem[] = []
 let rootFolder: string | null = null
+let currentPath: string | null = null
+let parentPath: string | null = null
 
 // 加载文件树
 export async function loadFileTree(folderPath?: string): Promise<void> {
@@ -25,8 +27,10 @@ export async function loadFileTree(folderPath?: string): Promise<void> {
     
     if (result) {
       // 解析返回的数据并转换字段名为驼峰命名法
-      const { root_path, items } = result as { root_path: string, items: any[] };
+      const { root_path, items, current_path, parent_path } = result as { root_path: string, items: any[], current_path?: string, parent_path?: string };
       rootFolder = root_path;
+      currentPath = current_path || root_path;
+      parentPath = parent_path || null;
       fileTreeData = items.map(convertItemToCamelCase);
     } else {
       fileTreeData = [];
@@ -67,6 +71,18 @@ export async function toggleDirectory(item: FileTreeItem): Promise<void> {
   renderFileTree()
 }
 
+// 导航到上级目录
+export async function navigateToParentDirectory(): Promise<void> {
+  if (!parentPath) return
+  
+  try {
+    await loadFileTree(parentPath)
+    renderFileTree()
+  } catch (error) {
+    console.error('导航到上级目录失败:', error)
+  }
+}
+
 // 获取文件树数据
 export function getFileTreeData(): FileTreeItem[] {
   return fileTreeData
@@ -96,6 +112,17 @@ export function renderFileTree(): void {
   // 如果文件树不可见，不执行任何操作
   if (!isFileTreeVisible) return
   
+  // 使用requestAnimationFrame优化渲染性能
+  requestAnimationFrame(() => {
+    renderFileTreeContent()
+  })
+}
+
+// 实际的文件树渲染逻辑
+function renderFileTreeContent(): void {
+  const outlinePanel = document.getElementById('outline-panel')
+  if (!outlinePanel) return
+  
   // 清空当前内容
   const fileTreeContainer = document.getElementById('file-tree-container')
   if (fileTreeContainer) {
@@ -123,33 +150,58 @@ export function renderFileTree(): void {
     toggleButton.title = '切换到大纲视图'
   }
   
+  // 添加返回上级目录按钮
+  if (parentPath) {
+    const backButton = document.createElement('div')
+    backButton.className = 'file-tree-back-btn'
+    backButton.innerHTML = '<i class="ri-arrow-left-line"></i>返回上级目录'
+    backButton.addEventListener('click', navigateToParentDirectory)
+    container.appendChild(backButton)
+  }
+  
   // 显示文件树根目录路径
   if (rootFolder) {
     const rootPathElement = document.createElement('div')
     rootPathElement.className = 'file-tree-root-path'
-    rootPathElement.textContent = rootFolder
+    rootPathElement.textContent = currentPath || rootFolder
+    rootPathElement.title = currentPath || rootFolder // 添加tooltip显示完整路径
     container.appendChild(rootPathElement)
   }
   
   // 递归渲染文件树项目
-  function renderItems(items: FileTreeItem[], parentElement: HTMLElement): void {
+  function renderItems(items: FileTreeItem[], parentElement: HTMLElement, level: number = 0): void {
     const ul = document.createElement('ul')
     ul.className = 'file-tree-list'
     
     items.forEach(item => {
       const li = document.createElement('li')
       li.className = 'file-tree-item'
-      li.style.paddingLeft = `${item.level * 16}px`
+      li.style.paddingLeft = `${level * 20}px`
+      
+      // 添加展开/折叠图标（仅目录）
+      if (item.isDirectory) {
+        const expandIcon = document.createElement('span')
+        expandIcon.className = 'file-tree-expand-icon'
+        expandIcon.classList.toggle('expanded', item.isExpanded)
+        expandIcon.innerHTML = '▶'
+        expandIcon.addEventListener('click', async (e) => {
+          e.stopPropagation()
+          await toggleDirectory(item)
+        })
+        li.appendChild(expandIcon)
+      } else {
+        // 为文件添加占位符，保持对齐
+        const spacer = document.createElement('span')
+        spacer.style.width = '20px'
+        spacer.style.display = 'inline-block'
+        li.appendChild(spacer)
+      }
       
       const icon = document.createElement('span')
       icon.className = 'file-tree-icon'
       
       if (item.isDirectory) {
         icon.innerHTML = item.isExpanded ? '📂' : '📁'
-        icon.addEventListener('click', async (e) => {
-          e.stopPropagation()
-          await toggleDirectory(item)
-        })
       } else {
         icon.innerHTML = '📄'
       }
@@ -220,23 +272,29 @@ export function renderFileTree(): void {
       
       // 如果是展开的目录，渲染子项目
       if (item.isDirectory && item.isExpanded && item.children && item.children.length > 0) {
-        renderItems(item.children, li)
+        renderItems(item.children, li, level + 1)
       }
     })
     
     parentElement.appendChild(ul)
   }
   
+  // 使用DocumentFragment优化DOM操作
+  const fragment = document.createDocumentFragment()
+  
   // 渲染文件树
   if (fileTreeData.length > 0) {
-    renderItems(fileTreeData, container)
+    renderItems(fileTreeData, fragment as any)
   } else {
     // 显示空状态
     const emptyState = document.createElement('div')
     emptyState.className = 'file-tree-empty'
     emptyState.textContent = '没有可显示的文件'
-    container.appendChild(emptyState)
+    fragment.appendChild(emptyState)
   }
+  
+  // 一次性添加所有元素
+  container.appendChild(fragment)
 }
 
 // 在文件树和大纲之间切换

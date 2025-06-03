@@ -342,6 +342,7 @@ body.dark-mode .outline-panel {
   backface-visibility: hidden;
   -webkit-font-smoothing: subpixel-antialiased;
   transform: translateZ(0);
+  contain: layout style paint;
 }
 
 .outline-item:hover {
@@ -717,6 +718,22 @@ body.resizing-outline {
   user-select: none;
 }
 
+/* 性能优化 - GPU加速 */
+.outline-panel,
+.file-tree-container,
+.ProseMirror {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* 优化滚动性能 */
+.outline-content,
+.file-tree-container,
+#editor {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
 /* 调整宽度时禁用过渡效果 */
 body.resizing-outline .outline-panel {
   transition: none;
@@ -728,7 +745,9 @@ body.resizing-outline .outline-panel {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overflow-x: auto;
   height: 100%;
+  white-space: nowrap;
 }
 
 .file-tree-header {
@@ -786,7 +805,6 @@ body.resizing-outline .outline-panel {
   list-style: none;
   padding: 0;
   margin: 0;
-  overflow-y: auto;
   flex: 1;
 }
 
@@ -796,6 +814,8 @@ body.resizing-outline .outline-panel {
   padding: 4px 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
+  position: relative;
+  white-space: nowrap;
 }
 
 .file-tree-item:hover {
@@ -809,8 +829,10 @@ body.resizing-outline .outline-panel {
   align-items: center;
   justify-content: center;
   width: 20px;
+  height: 20px;
   cursor: pointer;
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
 .file-tree-item:hover .file-tree-icon {
@@ -819,12 +841,10 @@ body.resizing-outline .outline-panel {
 
 .file-tree-name {
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-size: 14px;
   color: #495057;
   cursor: pointer;
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .file-tree-empty {
@@ -837,7 +857,56 @@ body.resizing-outline .outline-panel {
 /* 文件树内部的ul元素样式 */
 .file-tree-item ul {
   width: 100%;
-  margin-top: 4px;
+}
+
+/* 文件树展开/折叠图标 */
+.file-tree-expand-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.file-tree-expand-icon.expanded {
+  transform: rotate(90deg);
+}
+
+/* 文件树返回按钮样式 */
+.file-tree-back-btn {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+  font-size: 14px;
+  color: #495057;
+}
+
+.file-tree-back-btn:hover {
+  background-color: #e9ecef;
+}
+
+.file-tree-back-btn i {
+  font-size: 16px;
+}
+
+/* 夜间模式文件树返回按钮 */
+body.dark-mode .file-tree-back-btn {
+  background-color: #252525;
+  border-bottom: 1px solid #444;
+  color: #e0e0e0;
+}
+
+body.dark-mode .file-tree-back-btn:hover {
+  background-color: #3a3a3a;
 }
 
 /* 代码块高亮样式 */
@@ -1065,4 +1134,29 @@ body.dark-mode .outline-h4,
 body.dark-mode .outline-h5,
 body.dark-mode .outline-h6 {
   color: #adb5bd;
+}
+
+/* Markdown图片样式 */
+.ProseMirror img.markdown-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1em 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: block;
+}
+
+.ProseMirror img.markdown-image.ProseMirror-selectednode {
+  outline: 2px solid #1971c2;
+  outline-offset: 2px;
+}
+
+/* 夜间模式图片样式 */
+body.dark-mode .ProseMirror img.markdown-image {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0.9;
+}
+
+body.dark-mode .ProseMirror img.markdown-image.ProseMirror-selectednode {
+  outline: 2px solid #74c0fc;
 }
