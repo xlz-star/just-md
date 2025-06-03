@@ -216,7 +216,7 @@ export function addFileTab(file: OpenedFile, setActive: boolean = true): void {
   `
   
   // 添加点击事件
-  tabElement.addEventListener('click', (e) => {
+  tabElement.addEventListener('click', async (e) => {
     // 如果点击的是关闭按钮，不切换文件
     if ((e.target as HTMLElement).classList.contains('file-tab-close')) {
       return
@@ -225,7 +225,7 @@ export function addFileTab(file: OpenedFile, setActive: boolean = true): void {
     // 切换到该文件
     const index = openedFiles.findIndex(f => f.id === file.id)
     if (index !== -1) {
-      switchToFile(index)
+      await switchToFile(index)
     }
   })
   
@@ -254,7 +254,7 @@ export function addFileTab(file: OpenedFile, setActive: boolean = true): void {
 }
 
 // 切换到指定文件
-export function switchToFile(index: number): void {
+export async function switchToFile(index: number): Promise<void> {
   if (index < 0 || index >= openedFiles.length) return
   
   // 保存当前文件内容
@@ -267,8 +267,17 @@ export function switchToFile(index: number): void {
   // 重置大纲结构
   resetOutlineState()
   
-  // 更新编辑器内容
-  setEditorContent(file.content)
+  try {
+    // 渲染Markdown内容为HTML
+    const htmlContent = await invoke<string>('render_markdown_to_html', { markdown: file.content })
+    
+    // 更新编辑器内容为渲染后的HTML
+    setEditorContent(htmlContent)
+  } catch (err) {
+    console.error('渲染Markdown失败:', err)
+    // 如果渲染失败，使用原始内容
+    setEditorContent(file.content)
+  }
   
   // 确保编辑器内容不是默认样式
   const proseMirror = document.querySelector('.ProseMirror') as HTMLElement

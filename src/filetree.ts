@@ -146,7 +146,10 @@ export function renderFileTree(): void {
       
       if (item.isDirectory) {
         icon.innerHTML = item.isExpanded ? '📂' : '📁'
-        icon.addEventListener('click', () => toggleDirectory(item))
+        icon.addEventListener('click', async (e) => {
+          e.stopPropagation()
+          await toggleDirectory(item)
+        })
       } else {
         icon.innerHTML = '📄'
       }
@@ -205,7 +208,10 @@ export function renderFileTree(): void {
         })
       } else {
         // 为目录添加点击事件
-        name.addEventListener('click', () => toggleDirectory(item))
+        name.addEventListener('click', async (e) => {
+          e.stopPropagation()
+          await toggleDirectory(item)
+        })
       }
       
       li.appendChild(icon)

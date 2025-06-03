@@ -460,7 +460,22 @@ function renderOutline(headings: HeadingStructure[]): void {
         if (editor) {
           // 使用Tiptap API设置光标位置
           editor.commands.setTextSelection(heading.pos)
-          editor.commands.scrollIntoView()
+          
+          // 获取选中节点的DOM元素并滚动到视图中
+          const { view } = editor
+          const domAtPos = view.domAtPos(heading.pos)
+          if (domAtPos && domAtPos.node) {
+            const element = domAtPos.node.nodeType === Node.TEXT_NODE 
+              ? domAtPos.node.parentElement 
+              : domAtPos.node as HTMLElement
+            
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
+          }
+          
+          // 设置编辑器焦点
+          editor.commands.focus()
           
           // 设置活动状态
           setActiveOutlineItem(outlineItem)
