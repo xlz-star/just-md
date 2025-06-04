@@ -22,6 +22,16 @@ export function initAutoSave(): void {
   
   // Create auto-save indicator
   createAutoSaveIndicator()
+  
+  // Listen for settings changes
+  window.addEventListener('autoSaveSettingChanged', (e) => {
+    const event = e as CustomEvent
+    if (event.detail) {
+      enableAutoSave()
+    } else {
+      disableAutoSave()
+    }
+  })
 }
 
 export function enableAutoSave(): void {

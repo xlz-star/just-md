@@ -7,6 +7,7 @@ import { showThemeSelector } from './themes'
 import { toggleSplitView } from './splitView'
 import { showPrintPreview } from './printPreview'
 import { toggleFocusMode, toggleTypewriterMode } from './focusMode'
+import { showFullSourceEditor } from './sourceEditor'
 
 // 初始化菜单
 export function initMenus(): void {
@@ -34,6 +35,7 @@ export function initMenus(): void {
   const selectThemeItem = document.getElementById('select-theme')
   const toggleFocusModeItem = document.getElementById('toggle-focus-mode')
   const toggleTypewriterModeItem = document.getElementById('toggle-typewriter-mode')
+  const openSettingsItem = document.getElementById('open-settings')
   
   // 夜间模式切换按钮
   const themeToggleBtn = document.getElementById('theme-toggle-btn')
@@ -135,6 +137,10 @@ export function initMenus(): void {
   selectThemeItem?.addEventListener('click', showThemeSelector)
   toggleFocusModeItem?.addEventListener('click', toggleFocusMode)
   toggleTypewriterModeItem?.addEventListener('click', toggleTypewriterMode)
+  openSettingsItem?.addEventListener('click', () => {
+    const settingsBtn = document.getElementById('settings-btn')
+    settingsBtn?.click()
+  })
   
   // 夜间模式切换事件
   themeToggleBtn?.addEventListener('click', showThemeSelector)
@@ -189,6 +195,19 @@ export function initKeyboardShortcuts(): void {
       e.preventDefault()
       const editor = getEditor()
       editor?.chain().focus().setMathBlock('\\int_{a}^{b} f(x) dx = F(b) - F(a)').run()
+    }
+    
+    // Ctrl+, 打开设置
+    if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+      e.preventDefault()
+      const settingsBtn = document.getElementById('settings-btn')
+      settingsBtn?.click()
+    }
+    
+    // Ctrl+/ 编辑源码
+    if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+      e.preventDefault()
+      showFullSourceEditor()
     }
   })
 }

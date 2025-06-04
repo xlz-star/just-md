@@ -1904,6 +1904,353 @@ body.dark-mode .stats-value {
   bottom: 110px;
 }
 
+/* Settings Panel */
+.settings-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.settings-panel.hidden {
+  display: none;
+}
+
+.settings-content {
+  background: var(--color-surface, #fff);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.settings-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--color-text-secondary, #666);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.settings-close:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.settings-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.settings-section {
+  margin-bottom: 30px;
+}
+
+.settings-section h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: var(--color-text, #333);
+}
+
+.settings-item {
+  margin-bottom: 15px;
+}
+
+.settings-item label {
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.settings-item input[type="checkbox"] {
+  margin-right: 10px;
+  margin-top: 2px;
+}
+
+.settings-item span {
+  display: block;
+  font-size: 14px;
+  color: var(--color-text, #333);
+}
+
+.settings-item small {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-secondary, #666);
+  margin-top: 4px;
+}
+
+.settings-item select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 4px;
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #333);
+  font-size: 14px;
+}
+
+.settings-shortcuts {
+  margin-top: 10px;
+}
+
+.shortcut-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
+  font-size: 14px;
+}
+
+.shortcut-item:last-child {
+  border-bottom: none;
+}
+
+.shortcut-desc {
+  color: var(--color-text, #333);
+}
+
+.shortcut-key {
+  font-family: monospace;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--color-text-secondary, #666);
+}
+
+/* Source Editor Modal */
+.source-edit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.source-edit-modal.hidden {
+  display: none;
+}
+
+.source-edit-content {
+  background: var(--color-surface, #fff);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.source-edit-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.source-edit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.source-edit-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--color-text-secondary, #666);
+}
+
+.source-edit-body {
+  padding: 20px;
+}
+
+.source-edit-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 10px;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  resize: vertical;
+  color: var(--color-text, #333);
+  background: var(--color-surface, #fff);
+}
+
+.source-edit-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background: var(--color-primary, #1971c2);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent, #1864ab);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-text, #333);
+  border: 1px solid var(--color-border, #e0e0e0);
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Full Source Modal */
+.full-source-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.full-source-content {
+  background: var(--color-surface, #fff);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 800px;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.full-source-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.full-source-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.full-source-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--color-text-secondary, #666);
+}
+
+.full-source-body {
+  flex: 1;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.full-source-textarea {
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  color: var(--color-text, #333);
+  background: var(--color-surface, #fff);
+}
+
+.full-source-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Hide old floating buttons */
+.focus-mode-btn,
+.typewriter-mode-btn,
+.code-folding-btn,
+.theme-toggle-btn {
+  display: none;
+}
+
+/* Keep only essential floating buttons */
+.settings-btn {
+  bottom: 20px;
+  right: 20px;
+}
+
+.find-replace-btn {
+  bottom: 70px;
+  right: 20px;
+}
+
+.word-count-btn {
+  bottom: 120px;
+  right: 20px;
+}
+
 /* Theme System CSS Variables */
 :root {
   --color-background: #f8f9fa;

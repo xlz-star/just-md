@@ -3,9 +3,6 @@ import { getEditor } from './editor'
 let codeFoldingEnabled = true
 
 export function initCodeFolding(): void {
-  // Add code folding button
-  createCodeFoldingButton()
-  
   // Initialize folding state
   const savedState = localStorage.getItem('codeFoldingEnabled')
   if (savedState !== null) {
@@ -17,30 +14,6 @@ export function initCodeFolding(): void {
   }
 }
 
-function createCodeFoldingButton(): void {
-  const button = document.createElement('button')
-  button.id = 'code-folding-btn'
-  button.className = 'floating-btn code-folding-btn'
-  button.title = '切换代码折叠'
-  button.innerHTML = '<i class="ri-code-box-line"></i>'
-  
-  document.getElementById('app')?.appendChild(button)
-  
-  button.addEventListener('click', toggleCodeFolding)
-  
-  updateButtonState()
-}
-
-function updateButtonState(): void {
-  const button = document.getElementById('code-folding-btn')
-  if (button) {
-    if (codeFoldingEnabled) {
-      button.classList.add('active')
-    } else {
-      button.classList.remove('active')
-    }
-  }
-}
 
 export function toggleCodeFolding(): void {
   if (codeFoldingEnabled) {
@@ -57,7 +30,11 @@ function enableCodeFolding(): void {
   // Add fold/unfold buttons to code blocks
   addFoldButtons()
   
-  updateButtonState()
+  // Update settings checkbox if open
+  const checkbox = document.getElementById('code-folding-checkbox') as HTMLInputElement
+  if (checkbox) {
+    checkbox.checked = true
+  }
 }
 
 function disableCodeFolding(): void {
@@ -68,7 +45,11 @@ function disableCodeFolding(): void {
   removeFoldButtons()
   unfoldAllCode()
   
-  updateButtonState()
+  // Update settings checkbox if open
+  const checkbox = document.getElementById('code-folding-checkbox') as HTMLInputElement
+  if (checkbox) {
+    checkbox.checked = false
+  }
 }
 
 function addFoldButtons(): void {

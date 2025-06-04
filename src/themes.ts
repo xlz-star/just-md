@@ -163,8 +163,29 @@ export function getThemes(): Theme[] {
   return themes
 }
 
-export function getCurrentTheme(): Theme {
-  return currentTheme
+export function getCurrentTheme(): string {
+  // Return simplified theme name for settings
+  if (currentTheme.id.includes('dark')) return 'dark'
+  if (currentTheme.id.includes('sepia')) return 'sepia'
+  return 'light'
+}
+
+export function switchTheme(themeName: string): void {
+  let theme: Theme | undefined
+  switch (themeName) {
+    case 'dark':
+      theme = themes.find(t => t.id === 'default-dark')
+      break
+    case 'sepia':
+      theme = themes.find(t => t.id === 'default-sepia')
+      break
+    default:
+      theme = themes.find(t => t.id === 'default-light')
+  }
+  
+  if (theme) {
+    applyTheme(theme)
+  }
 }
 
 export function applyTheme(theme: Theme): void {

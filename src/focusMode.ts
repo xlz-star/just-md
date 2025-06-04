@@ -4,9 +4,6 @@ let focusModeEnabled = false
 let typewriterModeEnabled = false
 
 export function initFocusMode(): void {
-  createFocusModeButton()
-  createTypewriterModeButton()
-  
   // Load saved states
   const savedFocusMode = localStorage.getItem('focusModeEnabled')
   const savedTypewriterMode = localStorage.getItem('typewriterModeEnabled')
@@ -20,29 +17,6 @@ export function initFocusMode(): void {
   }
 }
 
-function createFocusModeButton(): void {
-  const button = document.createElement('button')
-  button.id = 'focus-mode-btn'
-  button.className = 'floating-btn focus-mode-btn'
-  button.title = '专注模式'
-  button.innerHTML = '<i class="ri-focus-3-line"></i>'
-  
-  document.getElementById('app')?.appendChild(button)
-  
-  button.addEventListener('click', toggleFocusMode)
-}
-
-function createTypewriterModeButton(): void {
-  const button = document.createElement('button')
-  button.id = 'typewriter-mode-btn'
-  button.className = 'floating-btn typewriter-mode-btn'
-  button.title = '打字机模式'
-  button.innerHTML = '<i class="ri-keyboard-line"></i>'
-  
-  document.getElementById('app')?.appendChild(button)
-  
-  button.addEventListener('click', toggleTypewriterMode)
-}
 
 export function toggleFocusMode(): void {
   if (focusModeEnabled) {
@@ -66,9 +40,10 @@ function enableFocusMode(): void {
   
   document.body.classList.add('focus-mode')
   
-  const button = document.getElementById('focus-mode-btn')
-  if (button) {
-    button.classList.add('active')
+  // Update settings checkbox if open
+  const checkbox = document.getElementById('focus-mode-checkbox') as HTMLInputElement
+  if (checkbox) {
+    checkbox.checked = true
   }
   
   // Apply focus effect
@@ -81,9 +56,10 @@ function disableFocusMode(): void {
   
   document.body.classList.remove('focus-mode')
   
-  const button = document.getElementById('focus-mode-btn')
-  if (button) {
-    button.classList.remove('active')
+  // Update settings checkbox if open
+  const checkbox = document.getElementById('focus-mode-checkbox') as HTMLInputElement
+  if (checkbox) {
+    checkbox.checked = false
   }
   
   // Remove focus effect
@@ -96,9 +72,10 @@ function enableTypewriterMode(): void {
   
   document.body.classList.add('typewriter-mode')
   
-  const button = document.getElementById('typewriter-mode-btn')
-  if (button) {
-    button.classList.add('active')
+  // Update settings checkbox if open
+  const checkbox = document.getElementById('typewriter-mode-checkbox') as HTMLInputElement
+  if (checkbox) {
+    checkbox.checked = true
   }
   
   // Start typewriter effect
@@ -111,9 +88,10 @@ function disableTypewriterMode(): void {
   
   document.body.classList.remove('typewriter-mode')
   
-  const button = document.getElementById('typewriter-mode-btn')
-  if (button) {
-    button.classList.remove('active')
+  // Update settings checkbox if open
+  const checkbox = document.getElementById('typewriter-mode-checkbox') as HTMLInputElement
+  if (checkbox) {
+    checkbox.checked = false
   }
   
   // Stop typewriter effect
@@ -212,20 +190,27 @@ function handleTypewriterScroll(): void {
   const editor = getEditor()
   if (!editor) return
   
-  const { from } = editor.state.selection
-  const coords = editor.view.coordsAtPos(from)
-  
-  const editorElement = document.querySelector('#editor') as HTMLElement
-  if (!editorElement) return
-  
-  const editorRect = editorElement.getBoundingClientRect()
-  const targetY = editorRect.height / 2
-  const currentY = coords.top - editorRect.top
-  const scrollOffset = currentY - targetY
-  
-  // Smooth scroll to center the cursor
-  editorElement.scrollBy({
-    top: scrollOffset,
-    behavior: 'smooth'
-  })
+  try {
+    const { from } = editor.state.selection
+    const coords = editor.view.coordsAtPos(from)
+    
+    const editorElement = document.querySelector('.ProseMirror') as HTMLElement
+    if (!editorElement) return
+    
+    const container = editorElement.parentElement as HTMLElement
+    if (!container) return
+    
+    const containerRect = container.getBoundingClientRect()
+    const targetY = containerRect.height / 2
+    const currentY = coords.top - containerRect.top + container.scrollTop
+    const scrollOffset = currentY - targetY
+    
+    // Smooth scroll to center the cursor
+    container.scrollTo({
+      top: scrollOffset,
+      behavior: 'smooth'
+    })
+  } catch (error) {
+    // Ignore errors when cursor position is not available
+  }
 }

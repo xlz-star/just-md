@@ -1,4 +1,4 @@
-import { initEditor, initDragAndDrop, setEditorContent, setCurrentFile, toggleSourceMode } from './editor'
+import { initEditor, initDragAndDrop, setEditorContent, setCurrentFile } from './editor'
 import { initOutlineFeature, resetOutlineState, updateOutlineIfNeeded } from './outline'
 import { initMenus, initKeyboardShortcuts } from './menu'
 import { handleFileDrop, saveFile, addFileTab, generateId } from './fileManager'
@@ -11,6 +11,8 @@ import { initCodeFolding } from './codeFolding'
 import { initPrintPreview } from './printPreview'
 import { initTocGenerator } from './tocGenerator'
 import { initFocusMode } from './focusMode'
+import { initSettings } from './settings'
+import { initSourceEditor } from './sourceEditor'
 import { OpenedFile } from './types'
 import { invoke } from '@tauri-apps/api/core'
 import './styles.css'
@@ -60,6 +62,12 @@ async function main() {
     
     // 初始化专注模式和打字机模式
     initFocusMode()
+    
+    // 初始化设置窗口
+    initSettings()
+    
+    // 初始化源码编辑器
+    initSourceEditor()
     
     // 延迟初始化字数统计功能，确保编辑器已创建
     setTimeout(() => {
@@ -125,13 +133,6 @@ async function main() {
       console.error('获取初始文件失败:', err)
     }
 
-    // 初始化源代码模式切换按钮
-    const sourceModeBtn = document.getElementById('source-mode-btn')
-    if (sourceModeBtn) {
-      sourceModeBtn.addEventListener('click', () => {
-        toggleSourceMode()
-      })
-    }
 
     // 其他样式初始化
     document.head.insertAdjacentHTML('beforeend', `

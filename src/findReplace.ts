@@ -7,6 +7,9 @@ export function initFindReplace(): void {
   // Create find/replace panel
   createFindReplacePanel()
   
+  // Create find/replace button
+  createFindReplaceButton()
+  
   // Add keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
@@ -23,6 +26,18 @@ export function initFindReplace(): void {
       closeFindReplace()
     }
   })
+}
+
+function createFindReplaceButton(): void {
+  const button = document.createElement('button')
+  button.id = 'find-replace-btn'
+  button.className = 'floating-btn find-replace-btn'
+  button.title = '查找/替换 (Ctrl+F)'
+  button.innerHTML = '<i class="ri-search-line"></i>'
+  
+  document.getElementById('app')?.appendChild(button)
+  
+  button.addEventListener('click', () => toggleFindReplace())
 }
 
 function createFindReplacePanel(): void {
