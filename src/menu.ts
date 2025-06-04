@@ -208,23 +208,6 @@ function initDarkMode(): void {
   }
 }
 
-// 切换夜间模式
-function toggleDarkMode(): void {
-  const isDarkMode = document.body.classList.contains('dark-mode')
-  
-  if (isDarkMode) {
-    // 切换到亮色模式
-    document.body.classList.remove('dark-mode')
-    localStorage.setItem('darkMode', 'false')
-    updateDarkModeIcon(false)
-  } else {
-    // 切换到夜间模式
-    document.body.classList.add('dark-mode')
-    localStorage.setItem('darkMode', 'true')
-    updateDarkModeIcon(true)
-  }
-}
-
 // 更新夜间模式图标
 function updateDarkModeIcon(isDarkMode: boolean): void {
   const themeToggleBtn = document.getElementById('theme-toggle-btn')

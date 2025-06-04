@@ -61,7 +61,7 @@ export const Footnote = Node.create<FootnoteOptions>({
   },
 
   addNodeView() {
-    return ({ node, getPos, editor }) => {
+    return ({ node, editor }) => {
       const sup = document.createElement('sup')
       sup.className = 'footnote-ref'
       sup.setAttribute('data-footnote', node.attrs.id)
@@ -91,7 +91,7 @@ export const Footnote = Node.create<FootnoteOptions>({
 
   addCommands() {
     return {
-      setFootnote: (id: string, content: string) => ({ commands, state }) => {
+      setFootnote: (id: string, content: string) => ({ commands }) => {
         // Generate unique ID if not provided
         const footnoteId = id || `footnote-${Date.now()}`
         
@@ -140,7 +140,8 @@ function showFootnoteTooltip(element: HTMLElement, content: string): void {
   
   // Remove on click outside
   const removeTooltip = (e: MouseEvent) => {
-    if (!tooltip.contains(e.target as Node) && e.target !== element) {
+    const target = e.target as HTMLElement
+    if (!tooltip.contains(target) && target !== element) {
       tooltip.remove()
       document.removeEventListener('click', removeTooltip)
     }

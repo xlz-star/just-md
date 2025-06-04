@@ -130,11 +130,6 @@ function insertToc(toc: TocItem[]): void {
   const editor = getEditor()
   if (!editor) return
   
-  const tocMarkdown = toc.map(item => {
-    const indent = '  '.repeat(item.level - 1)
-    return `${indent}- ${item.text}`
-  }).join('\n')
-  
   const tocHtml = `<div class="toc-block"><h2>目录</h2><ul>${
     toc.map(item => `<li class="toc-level-${item.level}">${item.text}</li>`).join('')
   }</ul></div>`

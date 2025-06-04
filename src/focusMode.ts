@@ -152,8 +152,6 @@ function handleFocusUpdate(): void {
   if (!editor) return
   
   const { from } = editor.state.selection
-  const resolved = editor.state.doc.resolve(from)
-  const currentNode = resolved.node()
   
   // Find all paragraph-like elements
   const editorElement = document.querySelector('.ProseMirror')

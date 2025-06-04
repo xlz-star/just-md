@@ -14,6 +14,16 @@ export interface SearchOptions {
   useRegex: boolean
 }
 
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    search: {
+      setSearchTerm: (searchOptions: SearchOptions) => ReturnType
+      setCurrentSearchIndex: (index: number) => ReturnType
+      clearSearch: () => ReturnType
+    }
+  }
+}
+
 const searchPluginKey = new PluginKey('search')
 
 export const SearchExtension = Extension.create({
@@ -34,7 +44,7 @@ export const SearchExtension = Extension.create({
 
   addCommands() {
     return {
-      setSearchTerm: (searchOptions: SearchOptions) => ({ tr, dispatch }) => {
+      setSearchTerm: (searchOptions: SearchOptions) => ({ tr, dispatch }: any) => {
         if (dispatch) {
           const meta = {
             searchOptions,
@@ -46,14 +56,14 @@ export const SearchExtension = Extension.create({
         return true
       },
 
-      setCurrentSearchIndex: (index: number) => ({ tr, dispatch }) => {
+      setCurrentSearchIndex: (index: number) => ({ tr, dispatch }: any) => {
         if (dispatch) {
           tr.setMeta(searchPluginKey, { currentIndex: index })
         }
         return true
       },
 
-      clearSearch: () => ({ tr, dispatch }) => {
+      clearSearch: () => ({ tr, dispatch }: any) => {
         if (dispatch) {
           tr.setMeta(searchPluginKey, {
             searchOptions: {

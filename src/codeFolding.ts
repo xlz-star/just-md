@@ -1,12 +1,5 @@
 import { getEditor } from './editor'
 
-interface FoldedRange {
-  from: number
-  to: number
-  placeholder: string
-}
-
-let foldedRanges: FoldedRange[] = []
 let codeFoldingEnabled = true
 
 export function initCodeFolding(): void {
