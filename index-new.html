@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Just MD</title>
+  <link rel="stylesheet" href="/src/styles-new.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Modern Title Bar -->
+    <div class="titlebar">
+      <div class="titlebar-content">
+        <div class="titlebar-controls">
+          <!-- Left side controls -->
+          <button class="icon-btn" id="sidebar-toggle" title="切换侧边栏">
+            <i class="ri-menu-line"></i>
+          </button>
+          <button class="icon-btn" id="new-file-btn" title="新建文件">
+            <i class="ri-file-add-line"></i>
+          </button>
+          <button class="icon-btn" id="open-file-btn" title="打开文件">
+            <i class="ri-folder-open-line"></i>
+          </button>
+          <button class="icon-btn" id="save-file-btn" title="保存">
+            <i class="ri-save-line"></i>
+          </button>
+        </div>
+        
+        <!-- Center title -->
+        <div class="titlebar-title" id="doc-title">未命名文档</div>
+        
+        <!-- Right side controls -->
+        <div class="titlebar-controls">
+          <button class="icon-btn" id="search-btn" title="查找">
+            <i class="ri-search-line"></i>
+          </button>
+          <button class="icon-btn" id="view-source-btn" title="查看源码">
+            <i class="ri-code-s-slash-line"></i>
+          </button>
+          <button class="icon-btn" id="settings-btn" title="设置">
+            <i class="ri-settings-3-line"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="main-container">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-tabs">
+            <button class="sidebar-tab active" data-tab="files">
+              文件
+            </button>
+            <button class="sidebar-tab" data-tab="outline">
+              大纲
+            </button>
+          </div>
+          <button class="icon-btn" id="sidebar-close" title="关闭侧边栏">
+            <i class="ri-close-line"></i>
+          </button>
+        </div>
+        
+        <div class="sidebar-content">
+          <!-- File Tree -->
+          <div class="sidebar-panel active" id="panel-files">
+            <div class="file-tree" id="file-tree">
+              <!-- File tree content will be dynamically added -->
+            </div>
+          </div>
+          
+          <!-- Outline -->
+          <div class="sidebar-panel" id="panel-outline">
+            <div class="outline-tree" id="outline-tree">
+              <!-- Outline content will be dynamically added -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Resize handle -->
+        <div class="sidebar-resizer"></div>
+      </aside>
+      
+      <!-- Editor Container -->
+      <div class="editor-container">
+        <!-- Tab Bar -->
+        <div class="tab-bar" id="tab-bar">
+          <!-- Tabs will be dynamically added -->
+        </div>
+        
+        <!-- Editor Wrapper -->
+        <div class="editor-wrapper">
+          <div id="editor"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-bar-left">
+        <div class="status-item" id="cursor-position">
+          <i class="ri-cursor-line"></i>
+          <span>行 1, 列 1</span>
+        </div>
+        <div class="status-item" id="word-count">
+          <i class="ri-text"></i>
+          <span>0 字</span>
+        </div>
+      </div>
+      <div class="status-bar-right">
+        <div class="status-item" id="save-status">
+          <i class="ri-check-line"></i>
+          <span>已保存</span>
+        </div>
+        <div class="status-item" id="encoding">
+          <span>UTF-8</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Floating Action Button -->
+    <button class="fab" id="fab" title="快速操作">
+      <i class="ri-add-line"></i>
+    </button>
+    
+    <!-- Floating Format Toolbar -->
+    <div class="format-toolbar" id="format-toolbar">
+      <button class="format-btn" data-format="bold" title="粗体">
+        <i class="ri-bold"></i>
+      </button>
+      <button class="format-btn" data-format="italic" title="斜体">
+        <i class="ri-italic"></i>
+      </button>
+      <button class="format-btn" data-format="heading" title="标题">
+        <i class="ri-h-1"></i>
+      </button>
+      <button class="format-btn" data-format="link" title="链接">
+        <i class="ri-link"></i>
+      </button>
+      <button class="format-btn" data-format="code" title="代码">
+        <i class="ri-code-line"></i>
+      </button>
+      <button class="format-btn" data-format="quote" title="引用">
+        <i class="ri-double-quotes-l"></i>
+      </button>
+    </div>
+  </div>
+  
+  <script type="module" src="/src/main-new.ts"></script>
+</body>
+</html>
