@@ -1,5 +1,4 @@
 import { getEditor } from './editor'
-import { getCurrentFilePath } from './editor'
 
 let sidebarCollapsed = false
 let formatToolbarVisible = false
@@ -16,7 +15,6 @@ export function initLayoutManager(): void {
 }
 
 function initSidebarControls(): void {
-  const sidebar = document.getElementById('sidebar')
   const sidebarToggle = document.getElementById('sidebar-toggle')
   const sidebarClose = document.getElementById('sidebar-close')
   const sidebarTabs = document.querySelectorAll('.sidebar-tab')
@@ -232,7 +230,6 @@ function updateCursorPosition(): void {
   if (!cursorPos) return
   
   const { from } = editor.state.selection
-  const pos = editor.view.state.doc.resolve(from)
   
   // Calculate line and column
   let line = 1

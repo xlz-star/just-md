@@ -7,7 +7,7 @@ import { toggleSplitView } from './splitView'
 import { showPrintPreview } from './printPreview'
 import { toggleFocusMode, toggleTypewriterMode } from './focusMode'
 import { showFullSourceEditor } from './sourceEditor'
-import { insertToc } from './tocGenerator'
+import { insertToc, generateToc } from './tocGenerator'
 
 interface Command {
   id: string
@@ -179,7 +179,12 @@ const commands: Command[] = [
     id: 'insert.toc',
     name: '插入目录',
     category: '插入',
-    action: insertToc
+    action: () => {
+      const toc = generateToc()
+      if (toc && toc.length > 0) {
+        insertToc(toc)
+      }
+    }
   },
   {
     id: 'insert.mathInline',

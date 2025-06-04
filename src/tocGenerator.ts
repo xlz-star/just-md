@@ -91,7 +91,7 @@ function showTocDialog(): void {
   })
 }
 
-function generateToc(): TocItem[] {
+export function generateToc(): TocItem[] {
   const editor = getEditor()
   if (!editor) return []
   
@@ -126,7 +126,7 @@ function jumpToHeading(id: string): void {
   }
 }
 
-function insertToc(toc: TocItem[]): void {
+export function insertToc(toc: TocItem[]): void {
   const editor = getEditor()
   if (!editor) return
   
