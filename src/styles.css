@@ -4657,3 +4657,410 @@ body.dark-mode .btn-secondary:hover {
   background: #4a4a4a;
   color: #e0e0e0;
 }
+
+/* 文档比较样式 */
+.comparison-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.comparison-panel.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.comparison-content {
+  background: white;
+  border-radius: 12px;
+  width: 95vw;
+  height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: comparisonSlideIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes comparisonSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.comparison-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e1e5e9;
+  background: linear-gradient(135deg, #2196f3 0%, #21cbf3 100%);
+  color: white;
+  flex-shrink: 0;
+}
+
+.comparison-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.comparison-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.comparison-export,
+.comparison-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.comparison-export:hover,
+.comparison-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.comparison-toolbar {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e1e5e9;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.comparison-file-info {
+  display: flex;
+  gap: 32px;
+}
+
+.file-info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+.file-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comparison-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.stat-item.insertions {
+  color: #22c55e;
+}
+
+.stat-item.deletions {
+  color: #ef4444;
+}
+
+.stat-item.modifications {
+  color: #f59e0b;
+}
+
+.stat-item.unchanged {
+  color: #6b7280;
+}
+
+.stat-label {
+  font-weight: 500;
+}
+
+.stat-value {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.comparison-body {
+  flex: 1;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.comparison-view {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 文档选择器样式 */
+.document-selector {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selector-section {
+  text-align: center;
+  max-width: 500px;
+}
+
+.selector-section h3 {
+  margin: 0 0 24px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.selector-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.selector-hint {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* 比较容器样式 */
+.comparison-container {
+  height: 100%;
+  display: flex;
+  gap: 1px;
+  background: #e1e5e9;
+}
+
+.comparison-pane {
+  flex: 1;
+  background: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.pane-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e1e5e9;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pane-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pane-label {
+  font-size: 12px;
+  color: #666;
+  background: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.pane-content {
+  flex: 1;
+  overflow-y: auto;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.comparison-divider {
+  width: 1px;
+  background: #cbd5e0;
+  flex-shrink: 0;
+}
+
+/* 差异行样式 */
+.diff-line {
+  padding: 4px 12px;
+  border-left: 4px solid transparent;
+  white-space: pre-wrap;
+  word-break: break-word;
+  transition: background-color 0.2s ease;
+}
+
+.diff-line:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.diff-insert {
+  background-color: #dcfce7;
+  border-left-color: #22c55e;
+}
+
+.diff-delete {
+  background-color: #fee2e2;
+  border-left-color: #ef4444;
+}
+
+.diff-replace {
+  background-color: #fef3c7;
+  border-left-color: #f59e0b;
+}
+
+.diff-equal {
+  background-color: transparent;
+  border-left-color: transparent;
+}
+
+/* 夜间模式文档比较样式 */
+body.dark-mode .comparison-content {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+body.dark-mode .comparison-header {
+  border-bottom-color: #404040;
+}
+
+body.dark-mode .comparison-toolbar {
+  background: #3a3a3a;
+  border-bottom-color: #404040;
+}
+
+body.dark-mode .file-label {
+  color: #a0a0a0;
+}
+
+body.dark-mode .file-name {
+  color: #e0e0e0;
+}
+
+body.dark-mode .selector-section h3 {
+  color: #e0e0e0;
+}
+
+body.dark-mode .selector-hint {
+  color: #a0a0a0;
+}
+
+body.dark-mode .comparison-container {
+  background: #404040;
+}
+
+body.dark-mode .comparison-pane {
+  background: #2a2a2a;
+}
+
+body.dark-mode .pane-header {
+  background: #3a3a3a;
+  border-bottom-color: #555;
+}
+
+body.dark-mode .pane-header h4 {
+  color: #e0e0e0;
+}
+
+body.dark-mode .pane-label {
+  background: #555;
+  color: #a0a0a0;
+}
+
+body.dark-mode .pane-content {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+body.dark-mode .comparison-divider {
+  background: #555;
+}
+
+body.dark-mode .diff-line:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .diff-insert {
+  background-color: rgba(34, 197, 94, 0.2);
+}
+
+body.dark-mode .diff-delete {
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
+body.dark-mode .diff-replace {
+  background-color: rgba(245, 158, 11, 0.2);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .comparison-content {
+    width: 98vw;
+    height: 95vh;
+  }
+  
+  .comparison-toolbar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .comparison-file-info {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .comparison-stats {
+    gap: 16px;
+  }
+  
+  .selector-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .comparison-container {
+    flex-direction: column;
+  }
+  
+  .pane-header h4 {
+    font-size: 14px;
+  }
+}
