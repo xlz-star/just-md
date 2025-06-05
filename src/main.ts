@@ -15,6 +15,7 @@ import { initSettings } from './settings'
 import { initSourceEditor } from './sourceEditor'
 import { UIAnimations } from './uiAnimations'
 import { initSpellCheck } from './spellCheck'
+import { initWritingStats } from './writingStats'
 import { OpenedFile } from './types'
 import { invoke } from '@tauri-apps/api/core'
 import './styles.css'
@@ -73,6 +74,9 @@ async function main() {
     
     // 初始化拼写检查
     initSpellCheck()
+    
+    // 初始化写作统计
+    initWritingStats()
     
     // 初始化源码编辑器
     initSourceEditor()
