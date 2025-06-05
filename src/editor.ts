@@ -12,6 +12,7 @@ import TableHeader from '@tiptap/extension-table-header'
 import { SearchExtension } from './searchExtension'
 import { MathInline, MathBlock } from './mathExtension'
 import { Footnote } from './footnoteExtension'
+import { setupPasteHandler, setupDragDropHandler } from './imageHandler'
 import 'highlight.js/styles/github.css'
 
 // 注册常用的编程语言
@@ -219,6 +220,10 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
     }
   })
   
+  // 设置图片粘贴和拖拽处理
+  setupPasteHandler(editor)
+  setupDragDropHandler(editor)
+  
   return editor
 }
 
@@ -304,14 +309,17 @@ export function getCurrentFileName(): string | null {
 
 // 设置当前文件信息
 export function setCurrentFile(path: string | null, name: string | null): void {
-  currentFilePath = path
-  currentFileName = name
+  currentFilePath = path;
+  currentFileName = name;
+  
+  // 设置到window对象，以便其他模块访问
+  (window as any).currentFilePath = path;
   
   // 更新窗口标题
   if (name) {
-    document.title = `${name} - Just MD`
+    document.title = `${name} - Just MD`;
   } else {
-    document.title = 'Just MD - Markdown 编辑器'
+    document.title = 'Just MD - Markdown 编辑器';
   }
 }
 
