@@ -3,7 +3,7 @@ import StarterKit from '@tiptap/starter-kit'
 import { updateOutlineIfNeeded } from './outline.ts'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { createLowlight } from 'lowlight'
-import Image from '@tiptap/extension-image'
+import ImageResize from './imageResizeExtension'
 import Link from '@tiptap/extension-link'
 import Table from '@tiptap/extension-table'
 import TableRow from '@tiptap/extension-table-row'
@@ -96,9 +96,10 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
           class: 'code-block',
         },
       }),
-      Image.configure({
+      ImageResize.configure({
         inline: true,
         allowBase64: true,
+        allowResize: true,
         HTMLAttributes: {
           class: 'markdown-image',
         },

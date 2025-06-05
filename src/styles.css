@@ -3171,3 +3171,93 @@ body.typewriter-mode .ProseMirror {
 .typewriter-mode-btn {
   bottom: 360px;
 }
+
+/* 图片调整大小样式 */
+.image-resize-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+.image-resize-wrapper img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+}
+
+.image-resize-wrapper:hover img {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #007acc;
+  border: 1px solid white;
+  border-radius: 50%;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.resize-handle:hover {
+  background: #005a9e;
+  transform: scale(1.2);
+}
+
+.resize-handle-nw {
+  top: -4px;
+  left: -4px;
+  cursor: nw-resize;
+}
+
+.resize-handle-ne {
+  top: -4px;
+  right: -4px;
+  cursor: ne-resize;
+}
+
+.resize-handle-sw {
+  bottom: -4px;
+  left: -4px;
+  cursor: sw-resize;
+}
+
+.resize-handle-se {
+  bottom: -4px;
+  right: -4px;
+  cursor: se-resize;
+}
+
+.image-resize-wrapper:hover .resize-handle {
+  opacity: 1;
+}
+
+/* 夜间模式下的图片调整样式 */
+body.dark-mode .resize-handle {
+  background: #00a0ff;
+  border-color: #333;
+}
+
+body.dark-mode .resize-handle:hover {
+  background: #0080cc;
+}
+
+body.dark-mode .image-resize-wrapper:hover img {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+/* 图片正在调整大小时的样式 */
+.image-resizing {
+  user-select: none;
+  pointer-events: none;
+}
+
+.image-resizing img {
+  transition: none;
+}

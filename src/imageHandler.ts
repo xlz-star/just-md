@@ -21,7 +21,10 @@ export async function handlePastedImage(
         });
         
         // 在编辑器中插入图片
-        editor.chain().focus().insertContent(`<img src="${imagePath}" alt="粘贴的图片" class="markdown-image" />`).run();
+        editor.chain().focus().setImage({ 
+          src: imagePath, 
+          alt: '粘贴的图片'
+        }).run();
         
         resolve();
       } catch (error) {
