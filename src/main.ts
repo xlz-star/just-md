@@ -13,6 +13,7 @@ import { initTocGenerator } from './tocGenerator'
 import { initFocusMode } from './focusMode'
 import { initSettings } from './settings'
 import { initSourceEditor } from './sourceEditor'
+import { UIAnimations } from './uiAnimations'
 import { OpenedFile } from './types'
 import { invoke } from '@tauri-apps/api/core'
 import './styles.css'
@@ -65,6 +66,9 @@ async function main() {
     
     // 初始化设置窗口
     initSettings()
+    
+    // 初始化UI动画系统
+    UIAnimations.init()
     
     // 初始化源码编辑器
     initSourceEditor()
