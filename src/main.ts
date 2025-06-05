@@ -18,6 +18,8 @@ import { initSpellCheck } from './spellCheck'
 import { initWritingStats } from './writingStats'
 import { initDocumentComparison } from './documentComparison'
 import { initTemplates } from './templates'
+import { initPerformanceOptimizations } from './performance'
+import { initCodeQuality } from './codeQuality'
 import { OpenedFile } from './types'
 import { invoke } from '@tauri-apps/api/core'
 import './styles.css'
@@ -25,6 +27,12 @@ import './styles.css'
 // 应用程序入口函数
 async function main() {
   try {
+    // 初始化性能优化系统
+    initPerformanceOptimizations()
+    
+    // 初始化代码质量系统
+    initCodeQuality()
+    
     // 初始化编辑器，并添加内容变化回调
     initEditor('', (isDirty: boolean) => {
       // 在此处理编辑器内容变化

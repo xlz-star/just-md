@@ -1,7 +1,12 @@
 import { getEditor } from './editor'
+import { PerformanceUtils, performanceMonitor, cacheManager } from './performance'
 
 let wordCountElement: HTMLElement | null = null
-let updateTimer: number | null = null
+let lastContent = ''
+let lastCounts = { words: 0, chars: 0, paras: 0, readTime: 0 }
+
+// 使用防抖优化更新频率
+const debouncedUpdate = PerformanceUtils.debounce(updateWordCount, 300)
 
 export function initWordCount(): void {
   createWordCountElement()
@@ -11,14 +16,10 @@ export function initWordCount(): void {
     // Initial count
     updateWordCount()
     
-    // Update on content change with debounce
+    // Update on content change with optimized debounce
     editor.on('update', () => {
-      if (updateTimer) {
-        clearTimeout(updateTimer)
-      }
-      updateTimer = setTimeout(() => {
-        updateWordCount()
-      }, 300) as unknown as number
+      performanceMonitor.recordOperation('word-count-update')
+      debouncedUpdate()
     })
   }
 }
@@ -67,33 +68,70 @@ function updateWordCount(): void {
   
   const text = editor.state.doc.textContent
   
-  // Count words (Chinese and English)
-  const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length
-  const englishWords = text
-    .replace(/[\u4e00-\u9fa5]/g, ' ')
-    .split(/\s+/)
-    .filter(word => word.length > 0).length
-  const totalWords = chineseChars + englishWords
+  // 避免不必要的重计算
+  if (text === lastContent) return
   
-  // Count characters (excluding spaces)
-  const charCount = text.replace(/\s/g, '').length
+  // 尝试从缓存获取计算结果
+  const cacheKey = `word-count-${text.length}-${text.slice(0, 100)}`
+  let cachedCounts = cacheManager.get(cacheKey)
   
-  // Count paragraphs
-  const paragraphs = text.split(/\n\n+/).filter(para => para.trim().length > 0).length
+  if (!cachedCounts) {
+    // 使用性能测量
+    performanceMonitor.measureRender('word-count', () => {
+      // Count words (Chinese and English) - 优化正则表达式
+      const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length
+      const englishWords = text
+        .replace(/[\u4e00-\u9fa5]/g, ' ')
+        .split(/\s+/)
+        .filter(word => word.length > 0).length
+      const totalWords = chineseChars + englishWords
+      
+      // Count characters (excluding spaces)
+      const charCount = text.replace(/\s/g, '').length
+      
+      // Count paragraphs
+      const paragraphs = text.split(/\n\n+/).filter(para => para.trim().length > 0).length
+      
+      // Estimate reading time (250 words per minute for English, 300 chars per minute for Chinese)
+      const readingTime = Math.ceil((chineseChars / 300) + (englishWords / 250))
+      
+      cachedCounts = {
+        words: totalWords,
+        chars: charCount,
+        paras: paragraphs,
+        readTime: readingTime
+      }
+    })
+    
+    // 缓存计算结果
+    cacheManager.set(cacheKey, cachedCounts, 60000) // 缓存1分钟
+  }
   
-  // Estimate reading time (250 words per minute for English, 300 chars per minute for Chinese)
-  const readingTime = Math.ceil((chineseChars / 300) + (englishWords / 250))
+  // 仅在数值发生变化时更新DOM
+  if (JSON.stringify(cachedCounts) !== JSON.stringify(lastCounts)) {
+    PerformanceUtils.batchDOMUpdates([
+      () => {
+        const wordCountValue = document.getElementById('word-count-value')
+        if (wordCountValue) wordCountValue.textContent = cachedCounts.words.toString()
+      },
+      () => {
+        const charCountValue = document.getElementById('char-count-value')
+        if (charCountValue) charCountValue.textContent = cachedCounts.chars.toString()
+      },
+      () => {
+        const paraCountValue = document.getElementById('para-count-value')
+        if (paraCountValue) paraCountValue.textContent = cachedCounts.paras.toString()
+      },
+      () => {
+        const readTimeValue = document.getElementById('read-time-value')
+        if (readTimeValue) readTimeValue.textContent = cachedCounts.readTime.toString()
+      }
+    ])
+    
+    lastCounts = cachedCounts
+  }
   
-  // Update UI
-  const wordCountValue = document.getElementById('word-count-value')
-  const charCountValue = document.getElementById('char-count-value')
-  const paraCountValue = document.getElementById('para-count-value')
-  const readTimeValue = document.getElementById('read-time-value')
-  
-  if (wordCountValue) wordCountValue.textContent = totalWords.toString()
-  if (charCountValue) charCountValue.textContent = charCount.toString()
-  if (paraCountValue) paraCountValue.textContent = paragraphs.toString()
-  if (readTimeValue) readTimeValue.textContent = readingTime.toString()
+  lastContent = text
 }
 
 function showDetailedStats(): void {
