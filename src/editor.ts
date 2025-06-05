@@ -14,6 +14,7 @@ import { MathInline, MathBlock } from './mathExtension'
 import { Footnote } from './footnoteExtension'
 import { setupPasteHandler, setupDragDropHandler } from './imageHandler'
 import { TableToolbar, setupTableShortcuts } from './tableToolbar'
+import { SpellCheckExtension } from './spellCheck'
 import 'highlight.js/styles/github.css'
 
 // 注册常用的编程语言
@@ -121,6 +122,7 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
       TableHeader,
       TableCell,
       SearchExtension,
+      SpellCheckExtension,
       MathInline,
       MathBlock,
       Footnote,

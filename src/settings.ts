@@ -1,6 +1,7 @@
 import { toggleFocusMode, toggleTypewriterMode } from './focusMode'
 import { toggleCodeFolding } from './codeFolding'
 import { switchTheme, getCurrentTheme } from './themes'
+import { spellChecker } from './spellCheck'
 
 let settingsPanel: HTMLElement | null = null
 
@@ -85,6 +86,24 @@ function createSettingsPanel(): void {
         </div>
         
         <div class="settings-section">
+          <h3>拼写检查</h3>
+          <div class="spell-check-settings">
+            <div class="spell-check-setting-item">
+              <span class="spell-check-setting-label">启用拼写检查</span>
+              <div class="spell-check-toggle" id="spell-check-toggle">
+              </div>
+            </div>
+            <div class="spell-check-setting-item">
+              <span class="spell-check-setting-label">检查语言</span>
+              <select class="spell-check-language-select" id="spell-check-language">
+                <option value="zh-CN">中文</option>
+                <option value="en-US">English</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="settings-section">
           <h3>快捷键</h3>
           <div class="settings-shortcuts">
             <div class="shortcut-item">
@@ -146,6 +165,20 @@ function createSettingsPanel(): void {
     // Trigger auto save update
     const event = new CustomEvent('autoSaveSettingChanged', { detail: target.checked })
     window.dispatchEvent(event)
+  })
+  
+  // Spell check event listeners
+  const spellCheckToggle = document.getElementById('spell-check-toggle')
+  spellCheckToggle?.addEventListener('click', () => {
+    const newState = !spellChecker.getEnabled()
+    spellChecker.setEnabled(newState)
+    spellCheckToggle.classList.toggle('active', newState)
+  })
+  
+  const spellCheckLanguage = document.getElementById('spell-check-language') as HTMLSelectElement
+  spellCheckLanguage?.addEventListener('change', (e) => {
+    const target = e.target as HTMLSelectElement
+    spellChecker.setLanguage(target.value)
   })
   
   // Click outside to close
@@ -214,6 +247,17 @@ function updateSettingsUI(): void {
   const autoSaveCheckbox = document.getElementById('auto-save-checkbox') as HTMLInputElement
   if (autoSaveCheckbox) {
     autoSaveCheckbox.checked = localStorage.getItem('autoSaveEnabled') === 'true'
+  }
+  
+  // Update spell check settings
+  const spellCheckToggle = document.getElementById('spell-check-toggle')
+  if (spellCheckToggle) {
+    spellCheckToggle.classList.toggle('active', spellChecker.getEnabled())
+  }
+  
+  const spellCheckLanguage = document.getElementById('spell-check-language') as HTMLSelectElement
+  if (spellCheckLanguage) {
+    spellCheckLanguage.value = spellChecker.getLanguage()
   }
 }
 
