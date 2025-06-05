@@ -12,13 +12,95 @@ use std::env;
 use base64::{Engine as _, engine::general_purpose};
 use chrono::Local;
 use std::path::PathBuf;
+use dirs;
 
 // 全局当前目录变量
 static CURRENT_DIRECTORY: OnceLock<Mutex<Option<String>>> = OnceLock::new();
 
+// 最近文件结构
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct RecentFile {
+    path: String,
+    name: String,
+    last_opened: String, // ISO 8601 格式的时间戳
+}
+
+// 最近文件列表管理
+static RECENT_FILES: OnceLock<Mutex<Vec<RecentFile>>> = OnceLock::new();
+
 // 获取当前目录实例
 fn get_current_directory() -> &'static Mutex<Option<String>> {
     CURRENT_DIRECTORY.get_or_init(|| Mutex::new(None))
+}
+
+// 获取最近文件列表实例
+fn get_recent_files_mutex() -> &'static Mutex<Vec<RecentFile>> {
+    RECENT_FILES.get_or_init(|| {
+        let mut files = Vec::new();
+        // 尝试从文件加载最近文件列表
+        if let Ok(loaded_files) = load_recent_files_from_disk() {
+            files = loaded_files;
+        }
+        Mutex::new(files)
+    })
+}
+
+// 获取配置目录路径
+fn get_config_dir() -> Result<PathBuf, String> {
+    match dirs::config_dir() {
+        Some(config_dir) => {
+            let app_config_dir = config_dir.join("just-md");
+            // 确保目录存在
+            if !app_config_dir.exists() {
+                if let Err(e) = fs::create_dir_all(&app_config_dir) {
+                    return Err(format!("无法创建配置目录: {}", e));
+                }
+            }
+            Ok(app_config_dir)
+        }
+        None => Err("无法获取配置目录".to_string()),
+    }
+}
+
+// 从磁盘加载最近文件列表
+fn load_recent_files_from_disk() -> Result<Vec<RecentFile>, String> {
+    let config_dir = get_config_dir()?;
+    let recent_files_path = config_dir.join("recent_files.json");
+    
+    if !recent_files_path.exists() {
+        return Ok(Vec::new());
+    }
+    
+    let content = match fs::read_to_string(&recent_files_path) {
+        Ok(content) => content,
+        Err(e) => return Err(format!("读取最近文件配置失败: {}", e)),
+    };
+    
+    match serde_json::from_str::<Vec<RecentFile>>(&content) {
+        Ok(files) => Ok(files),
+        Err(e) => {
+            eprintln!("解析最近文件配置失败: {}", e);
+            // 如果解析失败，返回空列表而不是错误
+            Ok(Vec::new())
+        }
+    }
+}
+
+// 保存最近文件列表到磁盘
+fn save_recent_files_to_disk(files: &[RecentFile]) -> Result<(), String> {
+    let config_dir = get_config_dir()?;
+    let recent_files_path = config_dir.join("recent_files.json");
+    
+    let json_content = match serde_json::to_string_pretty(files) {
+        Ok(content) => content,
+        Err(e) => return Err(format!("序列化最近文件列表失败: {}", e)),
+    };
+    
+    if let Err(e) = fs::write(&recent_files_path, json_content) {
+        return Err(format!("保存最近文件配置失败: {}", e));
+    }
+    
+    Ok(())
 }
 
 // 设置当前目录
@@ -348,6 +430,120 @@ fn save_image_from_base64(base64_data: &str, current_file_path: Option<&str>) ->
     Ok(format!("./images/{}", filename))
 }
 
+// 添加文件到最近文件列表
+#[tauri::command]
+fn add_recent_file(file_path: &str) -> Result<(), String> {
+    let path = Path::new(file_path);
+    
+    // 检查文件是否存在
+    if !path.exists() {
+        return Err(format!("文件不存在: {}", file_path));
+    }
+    
+    // 检查是否是 Markdown 文件
+    if !is_markdown_file(file_path) {
+        return Ok(()); // 不是 Markdown 文件，直接返回成功
+    }
+    
+    let file_name = match path.file_name().and_then(|n| n.to_str()) {
+        Some(name) => name.to_string(),
+        None => return Err("无法获取文件名".to_string()),
+    };
+    
+    let current_time = Local::now().to_rfc3339();
+    
+    let recent_file = RecentFile {
+        path: file_path.to_string(),
+        name: file_name,
+        last_opened: current_time,
+    };
+    
+    let recent_files_mutex = get_recent_files_mutex();
+    let mut recent_files = recent_files_mutex.lock().unwrap();
+    
+    // 如果文件已存在，移除旧记录
+    recent_files.retain(|f| f.path != file_path);
+    
+    // 添加到列表开头
+    recent_files.insert(0, recent_file);
+    
+    // 限制最近文件数量（保留最近20个）
+    const MAX_RECENT_FILES: usize = 20;
+    if recent_files.len() > MAX_RECENT_FILES {
+        recent_files.truncate(MAX_RECENT_FILES);
+    }
+    
+    // 保存到磁盘
+    if let Err(e) = save_recent_files_to_disk(&recent_files) {
+        eprintln!("保存最近文件列表失败: {}", e);
+    }
+    
+    Ok(())
+}
+
+// 获取最近文件列表
+#[tauri::command]
+fn get_recent_files_mutex() -> Vec<RecentFile> {
+    let recent_files_mutex = get_recent_files_mutex();
+    let recent_files = recent_files_mutex.lock().unwrap();
+    
+    // 过滤掉不存在的文件
+    let existing_files: Vec<RecentFile> = recent_files
+        .iter()
+        .filter(|f| Path::new(&f.path).exists())
+        .cloned()
+        .collect();
+    
+    // 如果过滤后的列表与原列表不同，更新并保存
+    if existing_files.len() != recent_files.len() {
+        drop(recent_files); // 释放锁
+        let recent_files_mutex = get_recent_files_mutex();
+        let mut recent_files = recent_files_mutex.lock().unwrap();
+        *recent_files = existing_files.clone();
+        
+        if let Err(e) = save_recent_files_to_disk(&recent_files) {
+            eprintln!("更新最近文件列表失败: {}", e);
+        }
+    }
+    
+    existing_files
+}
+
+// 从最近文件列表中移除文件
+#[tauri::command]
+fn remove_recent_file(file_path: &str) -> Result<(), String> {
+    let recent_files_mutex = get_recent_files_mutex();
+    let mut recent_files = recent_files_mutex.lock().unwrap();
+    
+    let original_len = recent_files.len();
+    recent_files.retain(|f| f.path != file_path);
+    
+    // 如果确实移除了文件，保存到磁盘
+    if recent_files.len() != original_len {
+        if let Err(e) = save_recent_files_to_disk(&recent_files) {
+            eprintln!("保存最近文件列表失败: {}", e);
+        }
+    }
+    
+    Ok(())
+}
+
+// 清空最近文件列表
+#[tauri::command]
+fn clear_recent_files() -> Result<(), String> {
+    let recent_files_mutex = get_recent_files_mutex();
+    let mut recent_files = recent_files_mutex.lock().unwrap();
+    
+    recent_files.clear();
+    
+    // 保存到磁盘
+    if let Err(e) = save_recent_files_to_disk(&recent_files) {
+        return Err(format!("清空最近文件列表失败: {}", e));
+    }
+    
+    Ok(())
+}
+
 // 导出为PDF（简单实现，通过HTML）
 #[tauri::command]
 fn export_to_pdf(markdown: &str, output_path: &str) -> Result<(), String> {
@@ -427,6 +623,10 @@ fn main() {
             get_raw_markdown,
             render_markdown_to_html,
             save_image_from_base64,
+            add_recent_file,
+            get_recent_files,
+            remove_recent_file,
+            clear_recent_files,
             export_to_pdf,
             set_current_directory,
             get_cli_args,

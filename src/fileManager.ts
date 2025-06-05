@@ -3,6 +3,7 @@ import { open, save } from '@tauri-apps/plugin-dialog'
 import { OpenedFile } from './types'
 import { getEditorContent, setEditorContent, setCurrentFile, getCurrentFilePath, getCurrentMarkdownContent } from './editor'
 import { resetOutlineState, updateOutlineIfNeeded } from './outline'
+import { recentFilesManager } from './recentFiles'
 
 // 动态导入以避免循环引用
 let filetreeModulePromise: Promise<any> | null = null;
@@ -96,6 +97,9 @@ export async function openFile(): Promise<void> {
           
           // 刷新文件树（如果需要）
           refreshFileTreeIfNeeded()
+          
+          // 添加到最近文件列表
+          recentFilesManager.addRecentFile(selected)
         } else {
           console.error('文件内容为空')
         }
@@ -547,4 +551,45 @@ export async function openFolder(): Promise<void> {
   } catch (e) {
     console.error('打开文件夹失败:', e);
   }
-} 
+}
+
+// 处理最近文件打开事件
+window.addEventListener('openRecentFile', async (event: Event) => {
+  const customEvent = event as CustomEvent;
+  const { file, htmlContent, markdownContent } = customEvent.detail;
+  
+  try {
+    // 添加到标签列表并设置编辑器内容为渲染后的HTML
+    addFileTab(file, false); // 先添加到标签，但不激活（避免触发switchToFile中的setEditorContent）
+    
+    // 手动设置当前文件信息
+    setCurrentFile(file.path, file.name);
+    
+    // 重置大纲结构
+    resetOutlineState();
+    
+    // 设置编辑器内容为渲染后的HTML，同时传入原始Markdown
+    setEditorContent(htmlContent, markdownContent);
+    
+    // 确保编辑器内容不是默认样式
+    const proseMirror = document.querySelector('.ProseMirror') as HTMLElement;
+    if (proseMirror) {
+      proseMirror.classList.remove('using-default-content');
+    }
+    
+    // 更新标签样式
+    updateTabsActiveState(file.id);
+    
+    // 更新大纲
+    updateOutlineIfNeeded();
+    
+    // 刷新文件树（如果需要）
+    refreshFileTreeIfNeeded();
+    
+    // 添加到最近文件列表（更新访问时间）
+    recentFilesManager.addRecentFile(file.path);
+    
+  } catch (error) {
+    console.error('打开最近文件失败:', error);
+  }
+}); 

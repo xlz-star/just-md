@@ -8,12 +8,14 @@ import { toggleSplitView } from './splitView'
 import { showPrintPreview } from './printPreview'
 import { toggleFocusMode, toggleTypewriterMode } from './focusMode'
 import { showFullSourceEditor } from './sourceEditor'
+import { showRecentFilesDialog } from './recentFilesDialog'
 
 // 初始化菜单
 export function initMenus(): void {
   // 文件菜单项
   const openFileItem = document.getElementById('open-file')
   const openFolderItem = document.getElementById('open-folder')
+  const recentFilesItem = document.getElementById('recent-files')
   const saveFileItem = document.getElementById('save-file')
   const exportHtmlItem = document.getElementById('export-html')
   const exportPdfItem = document.getElementById('export-pdf')
@@ -82,6 +84,7 @@ export function initMenus(): void {
   // 文件菜单项事件
   openFileItem?.addEventListener('click', openFile)
   openFolderItem?.addEventListener('click', openFolder)
+  recentFilesItem?.addEventListener('click', showRecentFilesDialog)
   saveFileItem?.addEventListener('click', saveFile)
   exportHtmlItem?.addEventListener('click', exportToHTML)
   exportPdfItem?.addEventListener('click', exportToPDF)
@@ -168,6 +171,12 @@ export function initKeyboardShortcuts(): void {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault()
       openFolder()
+    }
+    
+    // Ctrl+R 最近文件
+    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+      e.preventDefault()
+      showRecentFilesDialog()
     }
     
     // Ctrl+T 插入表格
