@@ -3261,3 +3261,154 @@ body.dark-mode .image-resize-wrapper:hover img {
 .image-resizing img {
   transition: none;
 }
+
+/* 表格样式增强 */
+.markdown-table {
+  border-collapse: collapse;
+  margin: 16px 0;
+  width: 100%;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.markdown-table th,
+.markdown-table td {
+  border: 1px solid #e1e5e9;
+  padding: 8px 12px;
+  text-align: left;
+  position: relative;
+}
+
+.markdown-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.markdown-table tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.markdown-table tr:hover {
+  background-color: #e9ecef;
+}
+
+/* 夜间模式表格样式 */
+body.dark-mode .markdown-table {
+  border-color: #404040;
+  background-color: #2a2a2a;
+}
+
+body.dark-mode .markdown-table th,
+body.dark-mode .markdown-table td {
+  border-color: #404040;
+}
+
+body.dark-mode .markdown-table th {
+  background-color: #353535;
+}
+
+body.dark-mode .markdown-table tr:nth-child(even) {
+  background-color: #2f2f2f;
+}
+
+body.dark-mode .markdown-table tr:hover {
+  background-color: #404040;
+}
+
+/* 表格工具栏样式 */
+.table-toolbar {
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+body.dark-mode .table-toolbar {
+  background: #2a2a2a;
+  border-color: #404040;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.table-toolbar-btn {
+  padding: 6px 8px;
+  border: none;
+  background: #f8f9fa;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
+  color: #495057;
+}
+
+.table-toolbar-btn:hover {
+  background-color: #e9ecef;
+}
+
+body.dark-mode .table-toolbar-btn {
+  background: #404040;
+  color: #e0e0e0;
+}
+
+body.dark-mode .table-toolbar-btn:hover {
+  background-color: #505050;
+}
+
+/* 表格编辑对话框样式 */
+.table-edit-dialog {
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .table-edit-dialog {
+  background: #2a2a2a;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+.table-edit-dialog h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+}
+
+body.dark-mode .table-edit-dialog h3 {
+  color: #e0e0e0;
+}
+
+.table-edit-dialog input {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+}
+
+body.dark-mode .table-edit-dialog input {
+  background: #404040;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+.table-edit-dialog button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+/* 表格选中状态 */
+.selectedCell {
+  background-color: #007acc !important;
+  color: white;
+}
+
+body.dark-mode .selectedCell {
+  background-color: #0056b3 !important;
+}

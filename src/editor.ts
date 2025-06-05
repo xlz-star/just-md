@@ -13,6 +13,7 @@ import { SearchExtension } from './searchExtension'
 import { MathInline, MathBlock } from './mathExtension'
 import { Footnote } from './footnoteExtension'
 import { setupPasteHandler, setupDragDropHandler } from './imageHandler'
+import { TableToolbar, setupTableShortcuts } from './tableToolbar'
 import 'highlight.js/styles/github.css'
 
 // 注册常用的编程语言
@@ -224,6 +225,13 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
   // 设置图片粘贴和拖拽处理
   setupPasteHandler(editor)
   setupDragDropHandler(editor)
+  
+  // 设置表格工具栏和快捷键
+  const tableToolbar = new TableToolbar(editor)
+  setupTableShortcuts(editor)
+  
+  // 存储工具栏实例以便后续清理
+  ;(editor as any).tableToolbar = tableToolbar
   
   return editor
 }
