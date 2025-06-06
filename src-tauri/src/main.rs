@@ -483,7 +483,7 @@ fn add_recent_file(file_path: &str) -> Result<(), String> {
 
 // 获取最近文件列表
 #[tauri::command]
-fn get_recent_files_mutex() -> Vec<RecentFile> {
+fn get_recent_files() -> Vec<RecentFile> {
     let recent_files_mutex = get_recent_files_mutex();
     let recent_files = recent_files_mutex.lock().unwrap();
     
@@ -546,7 +546,7 @@ fn clear_recent_files() -> Result<(), String> {
 
 // 导出为PDF（简单实现，通过HTML）
 #[tauri::command]
-fn export_to_pdf(markdown: &str, output_path: &str) -> Result<(), String> {
+fn export_to_pdf(_markdown: &str, _output_path: &str) -> Result<(), String> {
     // 暂时返回错误，提示需要外部工具
     // 在实际应用中，可以使用wkhtmltopdf或其他PDF生成库
     Err("PDF导出功能需要安装额外的依赖。请先导出为HTML，然后使用浏览器的打印功能保存为PDF。".to_string())
