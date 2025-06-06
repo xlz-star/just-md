@@ -238,7 +238,7 @@ body.dark-mode .shortcut {
   flex: 1;
   display: flex;
   overflow: hidden;
-  height: 100%;
+  height: calc(100vh - 38px);
 }
 
 /* 左侧大纲面板 */
@@ -281,6 +281,8 @@ body.dark-mode .outline-panel {
   transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
+  width: 0;
+  min-width: 0;
 }
 
 /* 固定状态的大纲面板 */
@@ -466,6 +468,7 @@ body.dark-mode .outline-panel {
   cursor: text;
   height: 100%;
   width: 100%;
+  min-height: 0;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
               background-color 0.3s ease,
               box-shadow 0.3s ease;
@@ -579,6 +582,8 @@ body.dark-mode #editor {
   scrollbar-width: thin;
   display: none;
   flex-shrink: 0;
+  min-height: 30px;
+  max-height: 30px;
 }
 
 #file-tabs.has-tabs {
@@ -670,11 +675,11 @@ body.dark-mode #editor {
 
 /* 当没有标签时，编辑器占据标签栏的空间 */
 #file-tabs:not(.has-tabs) + #main-content {
-  height: calc(100% - 38px);
+  height: calc(100vh - 38px);
 }
 
 #file-tabs.has-tabs + #main-content {
-  height: calc(100% - 68px);
+  height: calc(100vh - 68px);
 }
 
 .hidden:not(.outline-panel):not(.outline-overlay) {
