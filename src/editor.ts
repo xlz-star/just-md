@@ -79,26 +79,37 @@ function setupImageErrorHandling(): void {
     const target = e.target as HTMLImageElement
     if (target.tagName !== 'IMG' || !target.classList.contains('markdown-image')) return
     
+    // 获取原始 src（如果是第一次错误，保存原始 src）
+    let originalSrc = target.getAttribute('data-original-src')
+    if (!originalSrc) {
+      originalSrc = target.src
+      target.setAttribute('data-original-src', originalSrc)
+    }
+    
     // 如果已经在处理重试，则跳过
     if (target.getAttribute('data-retrying') === 'true') return
     
     const retryCount = parseInt(target.getAttribute('data-retry-count') || '0')
     const maxRetries = parseInt(target.getAttribute('data-max-retries') || '3')
-    const originalSrc = target.getAttribute('data-original-src') || target.src
+    
+    console.log(`图片加载失败 (当前重试次数: ${retryCount}/${maxRetries}): ${originalSrc}`)
     
     if (retryCount < maxRetries) {
-      // 标记正在重试
+      // 立即标记正在重试，防止重复触发
       target.setAttribute('data-retrying', 'true')
-      // 增加重试计数
-      target.setAttribute('data-retry-count', (retryCount + 1).toString())
       
-      console.log(`重试加载图片 (${retryCount + 1}/${maxRetries}): ${originalSrc}`)
+      // 增加重试计数
+      const newRetryCount = retryCount + 1
+      target.setAttribute('data-retry-count', newRetryCount.toString())
+      
+      console.log(`开始重试加载图片 (${newRetryCount}/${maxRetries}): ${originalSrc}`)
       
       // 延迟重试，避免频繁请求
       setTimeout(() => {
-        // 在修改src之前再次检查是否已经达到最大重试次数
+        // 再次检查是否应该停止重试
         const currentRetryCount = parseInt(target.getAttribute('data-retry-count') || '0')
         if (currentRetryCount > maxRetries) {
+          target.setAttribute('data-retrying', 'false')
           return
         }
         
@@ -106,30 +117,50 @@ function setupImageErrorHandling(): void {
         const separator = originalSrc.includes('?') ? '&' : '?'
         const newSrc = `${originalSrc}${separator}_retry=${Date.now()}`
         
-        // 先清除重试标记，然后设置新的src
+        console.log(`正在重试加载图片: ${newSrc}`)
+        
+        // 重置重试标记并设置新的src
         target.setAttribute('data-retrying', 'false')
         target.src = newSrc
-      }, 1000 * retryCount) // 递增延迟时间，但使用当前重试次数
+        
+        // 如果这次重试也失败了，设置一个超时来检查
+        setTimeout(() => {
+          if (target.getAttribute('data-retrying') === 'false' && 
+              parseInt(target.getAttribute('data-retry-count') || '0') >= maxRetries) {
+            // 达到最大重试次数，显示错误
+            target.setAttribute('data-retrying', 'true') // 防止再次触发
+            showImageError(target, originalSrc, maxRetries)
+          }
+        }, 5000) // 5秒后检查是否需要显示错误
+        
+      }, 2000 * newRetryCount) // 递增延迟：2秒、4秒、6秒
     } else {
       // 达到最大重试次数，显示错误占位符
-      console.error(`图片加载失败，已达到最大重试次数: ${originalSrc}`)
-      target.alt = `图片加载失败: ${originalSrc}`
-      target.title = `图片加载失败 (重试${maxRetries}次后仍然失败)`
-      
-      // 添加错误样式
-      target.classList.add('image-load-error')
-      target.style.border = '2px dashed #ff4757'
-      target.style.padding = '20px'
-      target.style.minHeight = '100px'
-      target.style.backgroundColor = '#ffebee'
-      target.style.color = '#c62828'
-      target.style.textAlign = 'center'
-      target.style.display = 'block'
-      
-      // 移除src属性，防止继续触发错误事件
-      target.removeAttribute('src')
+      showImageError(target, originalSrc, maxRetries)
     }
   }, true)
+  
+  // 显示图片错误
+  function showImageError(target: HTMLImageElement, originalSrc: string, maxRetries: number): void {
+    console.error(`图片加载失败，已达到最大重试次数: ${originalSrc}`)
+    target.alt = `图片加载失败: ${originalSrc}`
+    target.title = `图片加载失败 (重试${maxRetries}次后仍然失败)`
+    
+    // 添加错误样式
+    target.classList.add('image-load-error')
+    target.style.border = '2px dashed #ff4757'
+    target.style.padding = '20px'
+    target.style.minHeight = '100px'
+    target.style.backgroundColor = '#ffebee'
+    target.style.color = '#c62828'
+    target.style.textAlign = 'center'
+    target.style.display = 'block'
+    
+    // 彻底移除src属性，防止继续触发错误事件
+    target.removeAttribute('src')
+    // 标记为已处理，防止再次触发
+    target.setAttribute('data-retrying', 'true')
+  }
   
   // 图片加载成功时，重置重试计数
   editorElement.addEventListener('load', (e) => {
