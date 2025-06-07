@@ -6,23 +6,14 @@ import { spellChecker } from './spellCheck'
 let settingsPanel: HTMLElement | null = null
 
 export function initSettings(): void {
-  createSettingsButton()
   createSettingsPanel()
   
   // Load saved settings
   loadSettings()
-}
-
-function createSettingsButton(): void {
-  const button = document.createElement('button')
-  button.id = 'settings-btn'
-  button.className = 'floating-btn settings-btn'
-  button.title = '设置'
-  button.innerHTML = '<i class="ri-settings-3-line"></i>'
   
-  document.getElementById('app')?.appendChild(button)
-  
-  button.addEventListener('click', toggleSettings)
+  // Add event listener to navbar settings button
+  const navSettingsBtn = document.getElementById('nav-settings-btn')
+  navSettingsBtn?.addEventListener('click', toggleSettings)
 }
 
 function createSettingsPanel(): void {
@@ -99,6 +90,48 @@ function createSettingsPanel(): void {
                 <option value="zh-CN">中文</option>
                 <option value="en-US">English</option>
               </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="settings-section">
+          <h3>工具</h3>
+          <div class="settings-tools">
+            <div class="tool-item">
+              <button class="tool-btn" id="find-replace-tool">
+                <i class="ri-search-line"></i>
+                <span>查找/替换</span>
+              </button>
+            </div>
+            <div class="tool-item">
+              <button class="tool-btn" id="writing-stats-tool">
+                <i class="ri-bar-chart-line"></i>
+                <span>写作统计</span>
+              </button>
+            </div>
+            <div class="tool-item">
+              <button class="tool-btn" id="toc-generator-tool">
+                <i class="ri-list-ordered"></i>
+                <span>生成目录</span>
+              </button>
+            </div>
+            <div class="tool-item">
+              <button class="tool-btn" id="split-view-tool">
+                <i class="ri-layout-column-line"></i>
+                <span>分屏视图</span>
+              </button>
+            </div>
+            <div class="tool-item">
+              <button class="tool-btn" id="template-tool">
+                <i class="ri-file-add-line"></i>
+                <span>文档模板</span>
+              </button>
+            </div>
+            <div class="tool-item">
+              <button class="tool-btn" id="comparison-tool">
+                <i class="ri-file-copy-line"></i>
+                <span>文档比较</span>
+              </button>
             </div>
           </div>
         </div>
@@ -181,6 +214,45 @@ function createSettingsPanel(): void {
     spellChecker.setLanguage(target.value)
   })
   
+  // Tool buttons event listeners
+  const findReplaceToolBtn = document.getElementById('find-replace-tool')
+  findReplaceToolBtn?.addEventListener('click', () => {
+    const findReplaceBtn = document.getElementById('find-replace-btn') as HTMLElement
+    findReplaceBtn?.click()
+  })
+  
+  const writingStatsToolBtn = document.getElementById('writing-stats-tool')
+  writingStatsToolBtn?.addEventListener('click', () => {
+    const writingStatsBtn = document.getElementById('writing-stats-btn') as HTMLElement
+    writingStatsBtn?.click()
+  })
+  
+  const tocGeneratorToolBtn = document.getElementById('toc-generator-tool')
+  tocGeneratorToolBtn?.addEventListener('click', () => {
+    const tocBtn = document.getElementById('toc-btn') as HTMLElement
+    tocBtn?.click()
+  })
+  
+  const splitViewToolBtn = document.getElementById('split-view-tool')
+  splitViewToolBtn?.addEventListener('click', () => {
+    const splitViewBtn = document.getElementById('split-view-btn') as HTMLElement
+    splitViewBtn?.click()
+    // Update the tool button icon after split view toggle
+    setTimeout(() => updateSplitViewToolIcon(), 100)
+  })
+  
+  const templateToolBtn = document.getElementById('template-tool')
+  templateToolBtn?.addEventListener('click', () => {
+    const templateBtn = document.getElementById('template-btn') as HTMLElement
+    templateBtn?.click()
+  })
+  
+  const comparisonToolBtn = document.getElementById('comparison-tool')
+  comparisonToolBtn?.addEventListener('click', () => {
+    const comparisonBtn = document.getElementById('document-comparison-btn') as HTMLElement
+    comparisonBtn?.click()
+  })
+
   // Click outside to close
   panel.addEventListener('click', (e) => {
     if (e.target === panel) {
@@ -268,4 +340,20 @@ function loadSettings(): void {
 
 export function isSettingsOpen(): boolean {
   return settingsPanel ? !settingsPanel.classList.contains('hidden') : false
+}
+
+function updateSplitViewToolIcon(): void {
+  const splitViewToolBtn = document.getElementById('split-view-tool')
+  if (!splitViewToolBtn) return
+  
+  const icon = splitViewToolBtn.querySelector('i')
+  if (!icon) return
+  
+  // Check if split view is enabled by looking at the main container
+  const mainContent = document.getElementById('main-content')
+  if (mainContent?.classList.contains('split-view')) {
+    icon.className = 'ri-layout-row-line'
+  } else {
+    icon.className = 'ri-layout-column-line'
+  }
 }

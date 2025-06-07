@@ -50,9 +50,10 @@ export class DocumentComparisonManager {
   private createComparisonButton(): void {
     const button = document.createElement('button');
     button.id = 'document-comparison-btn';
-    button.className = 'floating-btn comparison-btn';
+    button.className = 'floating-btn comparison-btn hidden';
     button.title = '文档比较';
     button.innerHTML = '<i class="ri-file-copy-line"></i>';
+    button.style.display = 'none';
 
     document.getElementById('app')?.appendChild(button);
 

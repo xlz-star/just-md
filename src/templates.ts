@@ -912,9 +912,10 @@ export class TemplateManager {
   private createTemplateButton(): void {
     const button = document.createElement('button');
     button.id = 'template-btn';
-    button.className = 'floating-btn template-btn';
+    button.className = 'floating-btn template-btn hidden';
     button.title = '文档模板';
     button.innerHTML = '<i class="ri-file-add-line"></i>';
+    button.style.display = 'none';
 
     document.getElementById('app')?.appendChild(button);
 

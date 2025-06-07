@@ -31,9 +31,10 @@ export function initFindReplace(): void {
 function createFindReplaceButton(): void {
   const button = document.createElement('button')
   button.id = 'find-replace-btn'
-  button.className = 'floating-btn find-replace-btn'
+  button.className = 'floating-btn find-replace-btn hidden'
   button.title = '查找/替换 (Ctrl+F)'
   button.innerHTML = '<i class="ri-search-line"></i>'
+  button.style.display = 'none'
   
   document.getElementById('app')?.appendChild(button)
   

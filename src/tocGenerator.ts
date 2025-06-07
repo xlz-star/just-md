@@ -13,9 +13,10 @@ export function initTocGenerator(): void {
 function createTocButton(): void {
   const button = document.createElement('button')
   button.id = 'toc-btn'
-  button.className = 'floating-btn toc-btn'
+  button.className = 'floating-btn toc-btn hidden'
   button.title = '生成目录'
   button.innerHTML = '<i class="ri-list-ordered"></i>'
+  button.style.display = 'none'
   
   document.getElementById('app')?.appendChild(button)
   

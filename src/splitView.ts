@@ -14,9 +14,10 @@ export function initSplitView(): void {
 function createSplitViewButton(): void {
   const button = document.createElement('button')
   button.id = 'split-view-btn'
-  button.className = 'floating-btn split-view-btn'
+  button.className = 'floating-btn split-view-btn hidden'
   button.title = '切换分屏视图'
   button.innerHTML = '<i class="ri-layout-column-line"></i>'
+  button.style.display = 'none'
   
   document.getElementById('app')?.appendChild(button)
   

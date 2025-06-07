@@ -100,6 +100,7 @@ body.dark-mode {
 #navbar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
   height: 38px;
@@ -112,6 +113,58 @@ body.dark-mode {
 body.dark-mode #navbar {
   background-color: #252525;
   border-bottom: 1px solid #444;
+}
+
+/* 导航栏左侧容器 */
+.nav-left {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* 导航栏操作按钮容器 */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 导航栏设置按钮 */
+.nav-settings-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #495057;
+  transition: all 0.2s ease;
+}
+
+.nav-settings-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #212529;
+}
+
+.nav-settings-btn:active {
+  transform: scale(0.95);
+}
+
+.nav-settings-btn i {
+  font-size: 18px;
+}
+
+/* 夜间模式导航栏设置按钮 */
+body.dark-mode .nav-settings-btn {
+  color: #e0e0e0;
+}
+
+body.dark-mode .nav-settings-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 .nav-brand {
@@ -2304,19 +2357,82 @@ body.dark-mode .stats-value {
 }
 
 /* Keep only essential floating buttons */
-.settings-btn {
+.outline-btn {
   bottom: 20px;
-  right: 20px;
+  left: 20px;
 }
 
-.find-replace-btn {
-  bottom: 70px;
-  right: 20px;
+/* Hide settings floating button */
+.settings-btn {
+  display: none !important;
 }
 
-.word-count-btn {
-  bottom: 120px;
-  right: 20px;
+/* Hide all other floating buttons */
+.find-replace-btn,
+.stats-btn,
+.toc-btn,
+.split-view-btn,
+.template-btn,
+.comparison-btn {
+  display: none !important;
+}
+
+/* Settings tools styles */
+.settings-tools {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .settings-tools {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tool-item {
+  display: flex;
+}
+
+.tool-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.tool-btn:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(25, 113, 194, 0.2);
+}
+
+.tool-btn i {
+  font-size: 16px;
+}
+
+/* Dark mode tool button styles */
+body.dark-mode .tool-btn {
+  background: #2c2c2c;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+body.dark-mode .tool-btn:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
 }
 
 /* Theme System CSS Variables */

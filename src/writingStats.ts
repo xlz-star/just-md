@@ -245,9 +245,10 @@ export class WritingStatsManager {
   private createStatsButton(): void {
     const button = document.createElement('button');
     button.id = 'writing-stats-btn';
-    button.className = 'floating-btn stats-btn';
+    button.className = 'floating-btn stats-btn hidden';
     button.title = '写作统计';
     button.innerHTML = '<i class="ri-bar-chart-line"></i>';
+    button.style.display = 'none';
 
     document.getElementById('app')?.appendChild(button);
 
