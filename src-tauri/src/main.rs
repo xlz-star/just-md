@@ -422,7 +422,11 @@ fn save_image_from_base64(base64_data: &str, current_file_path: Option<&str>) ->
     
     // 如果文件已存在，直接返回路径（避免重复保存相同图片）
     if file_path.exists() {
-        return Ok(format!("./images/{}", filename));
+        // 返回绝对路径
+        return match file_path.to_str() {
+            Some(path) => Ok(path.to_string()),
+            None => Err("无法获取文件路径".to_string()),
+        };
     }
     
     // 保存文件
@@ -435,8 +439,11 @@ fn save_image_from_base64(base64_data: &str, current_file_path: Option<&str>) ->
         return Err(format!("写入文件失败: {}", e));
     }
     
-    // 返回相对路径
-    Ok(format!("./images/{}", filename))
+    // 返回绝对路径
+    match file_path.to_str() {
+        Some(path) => Ok(path.to_string()),
+        None => Err("无法获取文件路径".to_string()),
+    }
 }
 
 // 添加文件到最近文件列表

@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { Editor } from '@tiptap/core';
+import { convertToTauriUrl } from './imagePathHelper';
 
 // 处理粘贴的图片
 export async function handlePastedImage(
@@ -14,15 +15,18 @@ export async function handlePastedImage(
       try {
         const base64Data = e.target?.result as string;
         
-        // 调用后端保存图片
-        const imagePath = await invoke<string>('save_image_from_base64', {
+        // 调用后端保存图片（返回绝对路径）
+        const absolutePath = await invoke<string>('save_image_from_base64', {
           base64Data,
           currentFilePath
         });
         
+        // 将文件路径转换为 Tauri 可访问的 URL
+        const tauriUrl = convertToTauriUrl(absolutePath);
+        
         // 在编辑器中插入图片
         editor.chain().focus().setImage({ 
-          src: imagePath, 
+          src: tauriUrl, 
           alt: '粘贴的图片'
         }).run();
         
