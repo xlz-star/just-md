@@ -70,7 +70,12 @@ let sourceEditor: HTMLTextAreaElement | null = null
 let isSourceMode = false
 
 // 全局重试管理器，防止同一URL的多次重试
-const globalRetryManager = new Map<string, { isRetrying: boolean, retryCount: number }>()
+const globalRetryManager = new Map<string, { 
+  isRetrying: boolean, 
+  retryCount: number, 
+  retryTimeout?: ReturnType<typeof setTimeout>,
+  lastRetryTime?: number 
+}>()
 
 // 设置图片错误处理和重试逻辑
 function setupImageErrorHandling(): void {
@@ -96,9 +101,21 @@ function setupImageErrorHandling(): void {
       target.setAttribute('data-image-id', imageId)
     }
     
-    // 检查全局重试管理器
-    const globalRetryInfo = globalRetryManager.get(originalSrc)
-    if (globalRetryInfo?.isRetrying) {
+    // 原子化的重试次数检查和更新
+    const maxRetries = parseInt(target.getAttribute('data-max-retries') || '3')
+    const currentTime = Date.now()
+    
+    // 获取或初始化全局重试信息
+    let globalRetryInfo = globalRetryManager.get(originalSrc)
+    if (!globalRetryInfo) {
+      globalRetryInfo = { isRetrying: false, retryCount: 0, lastRetryTime: 0 }
+      globalRetryManager.set(originalSrc, globalRetryInfo)
+    }
+    
+    // 检查是否在重试中（包括时间检查，防止超时状态卡住）
+    if (globalRetryInfo.isRetrying && 
+        globalRetryInfo.lastRetryTime && 
+        (currentTime - globalRetryInfo.lastRetryTime) < 10000) { // 10秒超时保护
       console.log(`图片 ${imageId} URL已在全局重试中，跳过: ${originalSrc}`)
       return
     }
@@ -109,63 +126,62 @@ function setupImageErrorHandling(): void {
       return
     }
     
-    const retryCount = globalRetryInfo?.retryCount || parseInt(target.getAttribute('data-retry-count') || '0')
-    const maxRetries = parseInt(target.getAttribute('data-max-retries') || '3')
+    // 原子化检查和更新重试次数
+    const currentRetryCount = globalRetryInfo.retryCount
     
-    console.log(`图片 ${imageId} 加载失败 (当前重试次数: ${retryCount}/${maxRetries}): ${originalSrc}`)
+    console.log(`图片 ${imageId} 加载失败 (当前重试次数: ${currentRetryCount}/${maxRetries}): ${originalSrc}`)
     
-    if (retryCount < maxRetries) {
-      // 标记全局重试状态
-      const newRetryCount = retryCount + 1
-      globalRetryManager.set(originalSrc, { isRetrying: true, retryCount: newRetryCount })
-      
-      // 立即标记图片正在重试，防止重复触发
-      target.setAttribute('data-retrying', 'true')
-      target.setAttribute('data-retry-count', newRetryCount.toString())
-      
-      console.log(`图片 ${imageId} 开始重试加载 (${newRetryCount}/${maxRetries}): ${originalSrc}`)
-      
-      // 延迟重试，避免频繁请求
-      setTimeout(() => {
-        // 检查是否应该停止重试
-        const currentGlobalInfo = globalRetryManager.get(originalSrc)
-        if (!currentGlobalInfo || currentGlobalInfo.retryCount > maxRetries) {
-          target.setAttribute('data-retrying', 'false')
-          globalRetryManager.delete(originalSrc)
-          return
-        }
-        
-        // 添加时间戳避免缓存
-        const separator = originalSrc.includes('?') ? '&' : '?'
-        const newSrc = `${originalSrc}${separator}_retry=${Date.now()}`
-        
-        console.log(`正在重试加载图片 ${imageId}: ${newSrc}`)
-        
-        // 重置重试标记并设置新的src
-        target.setAttribute('data-retrying', 'false')
-        target.src = newSrc
-        
-        // 重置全局重试状态
-        globalRetryManager.set(originalSrc, { isRetrying: false, retryCount: newRetryCount })
-        
-        // 如果这次重试也失败了，设置一个超时来检查
-        setTimeout(() => {
-          const finalGlobalInfo = globalRetryManager.get(originalSrc)
-          if (finalGlobalInfo && finalGlobalInfo.retryCount >= maxRetries && 
-              target.getAttribute('data-retrying') === 'false') {
-            // 达到最大重试次数，显示错误
-            target.setAttribute('data-retrying', 'true') // 防止再次触发
-            showImageError(target, originalSrc, maxRetries)
-            globalRetryManager.delete(originalSrc) // 清理全局状态
-          }
-        }, 5000) // 5秒后检查是否需要显示错误
-        
-      }, 2000 * newRetryCount) // 递增延迟：2秒、4秒、6秒
-    } else {
-      // 达到最大重试次数，显示错误占位符
+    // 检查是否超过最大重试次数
+    if (currentRetryCount >= maxRetries) {
+      console.log(`图片 ${imageId} 已达到最大重试次数 ${maxRetries}，显示错误`)
       showImageError(target, originalSrc, maxRetries)
       globalRetryManager.delete(originalSrc) // 清理全局状态
+      return
     }
+    
+    // 原子化更新重试状态
+    const newRetryCount = currentRetryCount + 1
+    globalRetryInfo.isRetrying = true
+    globalRetryInfo.retryCount = newRetryCount
+    globalRetryInfo.lastRetryTime = currentTime
+    
+    // 立即标记图片正在重试，防止重复触发
+    target.setAttribute('data-retrying', 'true')
+    target.setAttribute('data-retry-count', newRetryCount.toString())
+    
+    console.log(`图片 ${imageId} 开始重试加载 (${newRetryCount}/${maxRetries}): ${originalSrc}`)
+    
+    // 清理之前的重试超时
+    if (globalRetryInfo.retryTimeout) {
+      clearTimeout(globalRetryInfo.retryTimeout)
+    }
+    
+    // 延迟重试，避免频繁请求
+    globalRetryInfo.retryTimeout = setTimeout(() => {
+      // 再次检查重试状态，确保没有被其他操作取消
+      const latestGlobalInfo = globalRetryManager.get(originalSrc)
+      if (!latestGlobalInfo || latestGlobalInfo.retryCount > maxRetries) {
+        target.setAttribute('data-retrying', 'false')
+        globalRetryManager.delete(originalSrc)
+        console.log(`图片 ${imageId} 重试被取消或超过最大次数`)
+        return
+      }
+      
+      // 添加时间戳避免缓存
+      const separator = originalSrc.includes('?') ? '&' : '?'
+      const newSrc = `${originalSrc}${separator}_retry=${Date.now()}`
+      
+      console.log(`正在重试加载图片 ${imageId}: ${newSrc} (${latestGlobalInfo.retryCount}/${maxRetries})`)
+      
+      // 重置重试标记并设置新的src
+      target.setAttribute('data-retrying', 'false')
+      target.src = newSrc
+      
+      // 重置全局重试状态，准备下次可能的重试
+      latestGlobalInfo.isRetrying = false
+      latestGlobalInfo.lastRetryTime = Date.now()
+      
+    }, Math.min(2000 * newRetryCount, 8000)) // 递增延迟，最大8秒
   }, true)
   
   // 显示图片错误
@@ -199,10 +215,15 @@ function setupImageErrorHandling(): void {
       target.setAttribute('data-retrying', 'false')
       target.classList.remove('image-load-error')
       
-      // 清除全局重试状态
+      // 清除全局重试状态和超时
       const originalSrc = target.getAttribute('data-original-src')
       if (originalSrc) {
+        const globalRetryInfo = globalRetryManager.get(originalSrc)
+        if (globalRetryInfo?.retryTimeout) {
+          clearTimeout(globalRetryInfo.retryTimeout)
+        }
         globalRetryManager.delete(originalSrc)
+        console.log(`图片 ${target.getAttribute('data-image-id')} 加载成功，清理重试状态: ${originalSrc}`)
       }
       
       // 清除错误样式
