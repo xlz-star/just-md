@@ -13,6 +13,7 @@ use base64::{Engine as _, engine::general_purpose};
 use chrono::Local;
 use std::path::PathBuf;
 use dirs;
+use sha2::{Sha256, Digest};
 
 // 全局当前目录变量
 static CURRENT_DIRECTORY: OnceLock<Mutex<Option<String>>> = OnceLock::new();
@@ -411,10 +412,18 @@ fn save_image_from_base64(base64_data: &str, current_file_path: Option<&str>) ->
         }
     }
     
-    // 生成唯一文件名
-    let timestamp = Local::now().format("%Y%m%d_%H%M%S_%3f");
-    let filename = format!("image_{}.{}", timestamp, extension);
+    // 使用图片内容的哈希值生成文件名，确保相同图片得到相同文件名
+    let mut hasher = Sha256::new();
+    hasher.update(&image_data);
+    let hash = hasher.finalize();
+    let hash_str = format!("{:x}", hash);
+    let filename = format!("image_{}.{}", &hash_str[0..16], extension);
     let file_path = save_dir.join(&filename);
+    
+    // 如果文件已存在，直接返回路径（避免重复保存相同图片）
+    if file_path.exists() {
+        return Ok(format!("./images/{}", filename));
+    }
     
     // 保存文件
     let mut file = match fs::File::create(&file_path) {
