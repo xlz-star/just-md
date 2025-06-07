@@ -15,8 +15,6 @@ export default defineConfig({
         '**/*.d.ts',
       ],
     },
-    // Mock Tauri APIs
-    mockPossibleSideEffects: true,
   },
   resolve: {
     alias: {
