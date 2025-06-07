@@ -79,11 +79,16 @@ function setupImageErrorHandling(): void {
     const target = e.target as HTMLImageElement
     if (target.tagName !== 'IMG' || !target.classList.contains('markdown-image')) return
     
+    // 如果已经在处理重试，则跳过
+    if (target.getAttribute('data-retrying') === 'true') return
+    
     const retryCount = parseInt(target.getAttribute('data-retry-count') || '0')
     const maxRetries = parseInt(target.getAttribute('data-max-retries') || '3')
     const originalSrc = target.getAttribute('data-original-src') || target.src
     
     if (retryCount < maxRetries) {
+      // 标记正在重试
+      target.setAttribute('data-retrying', 'true')
       // 增加重试计数
       target.setAttribute('data-retry-count', (retryCount + 1).toString())
       
@@ -94,6 +99,11 @@ function setupImageErrorHandling(): void {
         // 添加时间戳避免缓存
         const separator = originalSrc.includes('?') ? '&' : '?'
         target.src = `${originalSrc}${separator}_retry=${Date.now()}`
+        
+        // 重置重试标记
+        setTimeout(() => {
+          target.setAttribute('data-retrying', 'false')
+        }, 100)
       }, 1000 * (retryCount + 1)) // 递增延迟时间
     } else {
       // 达到最大重试次数，显示错误占位符
@@ -110,6 +120,9 @@ function setupImageErrorHandling(): void {
       target.style.color = '#c62828'
       target.style.textAlign = 'center'
       target.style.display = 'block'
+      
+      // 移除src属性，防止继续触发错误事件
+      target.removeAttribute('src')
     }
   }, true)
   

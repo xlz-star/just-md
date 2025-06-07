@@ -221,7 +221,11 @@ function createSettingsPanel(): void {
     if (!toolBtn) return
     
     const toolId = toolBtn.id
+    console.log('Tool button clicked:', toolId) // Debug log
     closeSettings() // Close settings panel first
+    
+    // Add delay to ensure settings panel is closed
+    await new Promise(resolve => setTimeout(resolve, 100))
     
     // Dispatch events to trigger functionality
     switch (toolId) {
@@ -237,9 +241,8 @@ function createSettingsPanel(): void {
         
       case 'writing-stats-tool':
         // Import and call writing stats
-        const { WritingStats } = await import('./writingStats')
-        const writingStats = WritingStats.getInstance()
-        writingStats.toggleStats()
+        const { writingStatsManager } = await import('./writingStats')
+        writingStatsManager.toggleStats()
         break
         
       case 'toc-generator-tool':
@@ -257,16 +260,14 @@ function createSettingsPanel(): void {
         
       case 'template-tool':
         // Import and call templates
-        const { TemplateManager } = await import('./templates')
-        const templateManager = TemplateManager.getInstance()
+        const { templateManager } = await import('./templates')
         templateManager.showTemplates()
         break
         
       case 'comparison-tool':
         // Import and call document comparison
-        const { DocumentComparison } = await import('./documentComparison')
-        const docComparison = DocumentComparison.getInstance()
-        docComparison.showDocumentSelection()
+        const { documentComparisonManager } = await import('./documentComparison')
+        documentComparisonManager.showDocumentSelection()
         break
     }
   })

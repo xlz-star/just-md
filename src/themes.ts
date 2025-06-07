@@ -143,6 +143,30 @@ const themes: Theme[] = [
       fontSize: '16px',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }
+  },
+  {
+    id: 'default-sepia',
+    name: '护眼模式',
+    isDark: false,
+    colors: {
+      background: '#f9f6f0',
+      surface: '#fefdf8',
+      primary: '#8b6914',
+      secondary: '#a67c00',
+      text: '#5c5139',
+      textSecondary: '#7d6e4a',
+      border: '#e8e2d5',
+      accent: '#c8a01e'
+    },
+    editor: {
+      background: '#fefdf8',
+      text: '#5c5139',
+      selection: 'rgba(139, 105, 20, 0.15)',
+      cursor: '#8b6914',
+      lineHeight: '1.7',
+      fontSize: '16px',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    }
   }
 ]
 
