@@ -68,6 +68,66 @@ lowlight.register('sql', sql)
 let editor: Editor
 let sourceEditor: HTMLTextAreaElement | null = null
 let isSourceMode = false
+
+// 设置图片错误处理和重试逻辑
+function setupImageErrorHandling(): void {
+  const editorElement = document.querySelector('#editor')
+  if (!editorElement) return
+  
+  // 使用事件委托监听图片错误
+  editorElement.addEventListener('error', (e) => {
+    const target = e.target as HTMLImageElement
+    if (target.tagName !== 'IMG' || !target.classList.contains('markdown-image')) return
+    
+    const retryCount = parseInt(target.getAttribute('data-retry-count') || '0')
+    const maxRetries = parseInt(target.getAttribute('data-max-retries') || '3')
+    const originalSrc = target.getAttribute('data-original-src') || target.src
+    
+    if (retryCount < maxRetries) {
+      // 增加重试计数
+      target.setAttribute('data-retry-count', (retryCount + 1).toString())
+      
+      // 延迟重试，避免频繁请求
+      setTimeout(() => {
+        console.log(`重试加载图片 (${retryCount + 1}/${maxRetries}): ${originalSrc}`)
+        
+        // 添加时间戳避免缓存
+        const separator = originalSrc.includes('?') ? '&' : '?'
+        target.src = `${originalSrc}${separator}_retry=${Date.now()}`
+      }, 1000 * (retryCount + 1)) // 递增延迟时间
+    } else {
+      // 达到最大重试次数，显示错误占位符
+      console.error(`图片加载失败，已达到最大重试次数: ${originalSrc}`)
+      target.alt = `图片加载失败: ${originalSrc}`
+      target.title = `图片加载失败 (重试${maxRetries}次后仍然失败)`
+      
+      // 添加错误样式
+      target.classList.add('image-load-error')
+      target.style.border = '2px dashed #ff4757'
+      target.style.padding = '20px'
+      target.style.minHeight = '100px'
+      target.style.backgroundColor = '#ffebee'
+      target.style.color = '#c62828'
+      target.style.textAlign = 'center'
+      target.style.display = 'block'
+    }
+  }, true)
+  
+  // 图片加载成功时，重置重试计数
+  editorElement.addEventListener('load', (e) => {
+    const target = e.target as HTMLImageElement
+    if (target.tagName === 'IMG' && target.classList.contains('markdown-image')) {
+      target.setAttribute('data-retry-count', '0')
+      target.classList.remove('image-load-error')
+      target.style.border = ''
+      target.style.padding = ''
+      target.style.minHeight = ''
+      target.style.backgroundColor = ''
+      target.style.color = ''
+      target.style.textAlign = ''
+    }
+  }, true)
+}
 let currentMarkdownContent = ''
 
 // 初始化编辑器
@@ -234,6 +294,9 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
   
   // 存储工具栏实例以便后续清理
   ;(editor as any).tableToolbar = tableToolbar
+  
+  // 设置图片错误处理和重试逻辑
+  setupImageErrorHandling()
   
   return editor
 }

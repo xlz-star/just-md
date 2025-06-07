@@ -295,7 +295,15 @@ export const ImageResize = Node.create<ImageResizeOptions>({
   },
   
   renderHTML({ HTMLAttributes }) {
-    return ['img', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)];
+    // Add retry logic for image loading
+    const imgAttrs = mergeAttributes(this.options.HTMLAttributes, HTMLAttributes);
+    
+    // Add data attributes for retry logic
+    imgAttrs['data-retry-count'] = '0';
+    imgAttrs['data-max-retries'] = '3';
+    imgAttrs['data-original-src'] = imgAttrs.src;
+    
+    return ['img', imgAttrs];
   },
   
   addCommands() {

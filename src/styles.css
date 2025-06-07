@@ -131,8 +131,7 @@ body.dark-mode #navbar {
 
 /* 导航栏设置按钮 */
 .nav-settings-btn {
-  width: 32px;
-  height: 32px;
+  padding: 4px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,6 +140,8 @@ body.dark-mode #navbar {
   border-radius: 6px;
   cursor: pointer;
   color: #495057;
+  font-size: 13px;
+  font-weight: 500;
   transition: all 0.2s ease;
 }
 
@@ -151,10 +152,6 @@ body.dark-mode #navbar {
 
 .nav-settings-btn:active {
   transform: scale(0.95);
-}
-
-.nav-settings-btn i {
-  font-size: 18px;
 }
 
 /* 夜间模式导航栏设置按钮 */

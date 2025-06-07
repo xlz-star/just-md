@@ -214,43 +214,61 @@ function createSettingsPanel(): void {
     spellChecker.setLanguage(target.value)
   })
   
-  // Tool buttons event listeners
-  const findReplaceToolBtn = document.getElementById('find-replace-tool')
-  findReplaceToolBtn?.addEventListener('click', () => {
-    const findReplaceBtn = document.getElementById('find-replace-btn') as HTMLElement
-    findReplaceBtn?.click()
-  })
-  
-  const writingStatsToolBtn = document.getElementById('writing-stats-tool')
-  writingStatsToolBtn?.addEventListener('click', () => {
-    const writingStatsBtn = document.getElementById('writing-stats-btn') as HTMLElement
-    writingStatsBtn?.click()
-  })
-  
-  const tocGeneratorToolBtn = document.getElementById('toc-generator-tool')
-  tocGeneratorToolBtn?.addEventListener('click', () => {
-    const tocBtn = document.getElementById('toc-btn') as HTMLElement
-    tocBtn?.click()
-  })
-  
-  const splitViewToolBtn = document.getElementById('split-view-tool')
-  splitViewToolBtn?.addEventListener('click', () => {
-    const splitViewBtn = document.getElementById('split-view-btn') as HTMLElement
-    splitViewBtn?.click()
-    // Update the tool button icon after split view toggle
-    setTimeout(() => updateSplitViewToolIcon(), 100)
-  })
-  
-  const templateToolBtn = document.getElementById('template-tool')
-  templateToolBtn?.addEventListener('click', () => {
-    const templateBtn = document.getElementById('template-btn') as HTMLElement
-    templateBtn?.click()
-  })
-  
-  const comparisonToolBtn = document.getElementById('comparison-tool')
-  comparisonToolBtn?.addEventListener('click', () => {
-    const comparisonBtn = document.getElementById('document-comparison-btn') as HTMLElement
-    comparisonBtn?.click()
+  // Tool buttons event listeners - import functions first
+  settingsPanel.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement
+    const toolBtn = target.closest('.tool-btn') as HTMLElement
+    if (!toolBtn) return
+    
+    const toolId = toolBtn.id
+    closeSettings() // Close settings panel first
+    
+    // Dispatch events to trigger functionality
+    switch (toolId) {
+      case 'find-replace-tool':
+        // Trigger Ctrl+F shortcut
+        const findEvent = new KeyboardEvent('keydown', {
+          key: 'f',
+          ctrlKey: true,
+          bubbles: true
+        })
+        document.dispatchEvent(findEvent)
+        break
+        
+      case 'writing-stats-tool':
+        // Import and call writing stats
+        const { WritingStats } = await import('./writingStats')
+        const writingStats = WritingStats.getInstance()
+        writingStats.toggleStats()
+        break
+        
+      case 'toc-generator-tool':
+        // Import and call toc generator
+        const { showTocDialog } = await import('./tocGenerator')
+        showTocDialog()
+        break
+        
+      case 'split-view-tool':
+        // Import and call split view toggle
+        const { toggleSplitView } = await import('./splitView')
+        toggleSplitView()
+        setTimeout(() => updateSplitViewToolIcon(), 100)
+        break
+        
+      case 'template-tool':
+        // Import and call templates
+        const { TemplateManager } = await import('./templates')
+        const templateManager = TemplateManager.getInstance()
+        templateManager.showTemplates()
+        break
+        
+      case 'comparison-tool':
+        // Import and call document comparison
+        const { DocumentComparison } = await import('./documentComparison')
+        const docComparison = DocumentComparison.getInstance()
+        docComparison.showDocumentSelection()
+        break
+    }
   })
 
   // Click outside to close

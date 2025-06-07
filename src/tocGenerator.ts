@@ -23,7 +23,7 @@ function createTocButton(): void {
   button.addEventListener('click', showTocDialog)
 }
 
-function showTocDialog(): void {
+export function showTocDialog(): void {
   const toc = generateToc()
   
   const modal = document.createElement('div')
