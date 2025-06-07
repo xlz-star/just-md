@@ -157,18 +157,6 @@ const commands: Command[] = [
     }
   },
   {
-    id: 'insert.image',
-    name: '插入图片',
-    shortcut: 'Ctrl+Shift+I',
-    category: '插入',
-    action: () => {
-      const url = prompt('输入图片地址:')
-      if (url) {
-        getEditor()?.chain().focus().setImage({ src: url }).run()
-      }
-    }
-  },
-  {
     id: 'insert.table',
     name: '插入表格',
     shortcut: 'Ctrl+T',

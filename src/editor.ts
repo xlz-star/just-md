@@ -3,7 +3,6 @@ import StarterKit from '@tiptap/starter-kit'
 import { updateOutlineIfNeeded } from './outline.ts'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { createLowlight } from 'lowlight'
-import ImageResize from './imageResizeExtension'
 import Link from '@tiptap/extension-link'
 import Table from '@tiptap/extension-table'
 import TableRow from '@tiptap/extension-table-row'
@@ -12,7 +11,6 @@ import TableHeader from '@tiptap/extension-table-header'
 import { SearchExtension } from './searchExtension'
 import { MathInline, MathBlock } from './mathExtension'
 import { Footnote } from './footnoteExtension'
-import { setupPasteHandler, setupDragDropHandler } from './imageHandler'
 import { TableToolbar, setupTableShortcuts } from './tableToolbar'
 import { SpellCheckExtension } from './spellCheck'
 import 'highlight.js/styles/github.css'
@@ -68,175 +66,6 @@ lowlight.register('sql', sql)
 let editor: Editor
 let sourceEditor: HTMLTextAreaElement | null = null
 let isSourceMode = false
-
-// 全局重试管理器，防止同一URL的多次重试
-const globalRetryManager = new Map<string, { 
-  isRetrying: boolean, 
-  retryCount: number, 
-  retryTimeout?: ReturnType<typeof setTimeout>,
-  lastRetryTime?: number 
-}>()
-
-// 设置图片错误处理和重试逻辑
-function setupImageErrorHandling(): void {
-  const editorElement = document.querySelector('#editor')
-  if (!editorElement) return
-  
-  // 使用事件委托监听图片错误
-  editorElement.addEventListener('error', (e) => {
-    const target = e.target as HTMLImageElement
-    if (target.tagName !== 'IMG' || !target.classList.contains('markdown-image')) return
-    
-    // 获取原始 src（清理之前的重试参数）
-    let originalSrc = target.getAttribute('data-original-src')
-    if (!originalSrc) {
-      originalSrc = target.src.split('?_retry=')[0] // 移除之前的重试参数
-      target.setAttribute('data-original-src', originalSrc)
-    }
-    
-    // 为图片分配唯一ID（如果没有的话）
-    let imageId = target.getAttribute('data-image-id')
-    if (!imageId) {
-      imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      target.setAttribute('data-image-id', imageId)
-    }
-    
-    // 原子化的重试次数检查和更新
-    const maxRetries = parseInt(target.getAttribute('data-max-retries') || '3')
-    const currentTime = Date.now()
-    
-    // 获取或初始化全局重试信息
-    let globalRetryInfo = globalRetryManager.get(originalSrc)
-    if (!globalRetryInfo) {
-      globalRetryInfo = { isRetrying: false, retryCount: 0, lastRetryTime: 0 }
-      globalRetryManager.set(originalSrc, globalRetryInfo)
-    }
-    
-    // 检查是否在重试中（包括时间检查，防止超时状态卡住）
-    if (globalRetryInfo.isRetrying && 
-        globalRetryInfo.lastRetryTime && 
-        (currentTime - globalRetryInfo.lastRetryTime) < 10000) { // 10秒超时保护
-      console.log(`图片 ${imageId} URL已在全局重试中，跳过: ${originalSrc}`)
-      return
-    }
-    
-    // 如果图片本身已经在处理重试，则跳过
-    if (target.getAttribute('data-retrying') === 'true') {
-      console.log(`图片 ${imageId} 正在重试中，跳过此次错误事件`)
-      return
-    }
-    
-    // 原子化检查和更新重试次数
-    const currentRetryCount = globalRetryInfo.retryCount
-    
-    console.log(`图片 ${imageId} 加载失败 (当前重试次数: ${currentRetryCount}/${maxRetries}): ${originalSrc}`)
-    
-    // 检查是否超过最大重试次数
-    if (currentRetryCount >= maxRetries) {
-      console.log(`图片 ${imageId} 已达到最大重试次数 ${maxRetries}，显示错误`)
-      showImageError(target, originalSrc, maxRetries)
-      globalRetryManager.delete(originalSrc) // 清理全局状态
-      return
-    }
-    
-    // 原子化更新重试状态
-    const newRetryCount = currentRetryCount + 1
-    globalRetryInfo.isRetrying = true
-    globalRetryInfo.retryCount = newRetryCount
-    globalRetryInfo.lastRetryTime = currentTime
-    
-    // 立即标记图片正在重试，防止重复触发
-    target.setAttribute('data-retrying', 'true')
-    target.setAttribute('data-retry-count', newRetryCount.toString())
-    
-    console.log(`图片 ${imageId} 开始重试加载 (${newRetryCount}/${maxRetries}): ${originalSrc}`)
-    
-    // 清理之前的重试超时
-    if (globalRetryInfo.retryTimeout) {
-      clearTimeout(globalRetryInfo.retryTimeout)
-    }
-    
-    // 延迟重试，避免频繁请求
-    globalRetryInfo.retryTimeout = setTimeout(() => {
-      // 再次检查重试状态，确保没有被其他操作取消
-      const latestGlobalInfo = globalRetryManager.get(originalSrc)
-      if (!latestGlobalInfo || latestGlobalInfo.retryCount > maxRetries) {
-        target.setAttribute('data-retrying', 'false')
-        globalRetryManager.delete(originalSrc)
-        console.log(`图片 ${imageId} 重试被取消或超过最大次数`)
-        return
-      }
-      
-      // 添加时间戳避免缓存
-      const separator = originalSrc.includes('?') ? '&' : '?'
-      const newSrc = `${originalSrc}${separator}_retry=${Date.now()}`
-      
-      console.log(`正在重试加载图片 ${imageId}: ${newSrc} (${latestGlobalInfo.retryCount}/${maxRetries})`)
-      
-      // 重置重试标记并设置新的src
-      target.setAttribute('data-retrying', 'false')
-      target.src = newSrc
-      
-      // 重置全局重试状态，准备下次可能的重试
-      latestGlobalInfo.isRetrying = false
-      latestGlobalInfo.lastRetryTime = Date.now()
-      
-    }, Math.min(2000 * newRetryCount, 8000)) // 递增延迟，最大8秒
-  }, true)
-  
-  // 显示图片错误
-  function showImageError(target: HTMLImageElement, originalSrc: string, maxRetries: number): void {
-    console.error(`图片加载失败，已达到最大重试次数: ${originalSrc}`)
-    target.alt = `图片加载失败: ${originalSrc}`
-    target.title = `图片加载失败 (重试${maxRetries}次后仍然失败)`
-    
-    // 添加错误样式
-    target.classList.add('image-load-error')
-    target.style.border = '2px dashed #ff4757'
-    target.style.padding = '20px'
-    target.style.minHeight = '100px'
-    target.style.backgroundColor = '#ffebee'
-    target.style.color = '#c62828'
-    target.style.textAlign = 'center'
-    target.style.display = 'block'
-    
-    // 彻底移除src属性，防止继续触发错误事件
-    target.removeAttribute('src')
-    // 标记为已处理，防止再次触发
-    target.setAttribute('data-retrying', 'true')
-  }
-  
-  // 图片加载成功时，重置重试计数
-  editorElement.addEventListener('load', (e) => {
-    const target = e.target as HTMLImageElement
-    if (target.tagName === 'IMG' && target.classList.contains('markdown-image')) {
-      // 重置所有重试相关的属性
-      target.setAttribute('data-retry-count', '0')
-      target.setAttribute('data-retrying', 'false')
-      target.classList.remove('image-load-error')
-      
-      // 清除全局重试状态和超时
-      const originalSrc = target.getAttribute('data-original-src')
-      if (originalSrc) {
-        const globalRetryInfo = globalRetryManager.get(originalSrc)
-        if (globalRetryInfo?.retryTimeout) {
-          clearTimeout(globalRetryInfo.retryTimeout)
-        }
-        globalRetryManager.delete(originalSrc)
-        console.log(`图片 ${target.getAttribute('data-image-id')} 加载成功，清理重试状态: ${originalSrc}`)
-      }
-      
-      // 清除错误样式
-      target.style.border = ''
-      target.style.padding = ''
-      target.style.minHeight = ''
-      target.style.backgroundColor = ''
-      target.style.color = ''
-      target.style.textAlign = ''
-      target.style.display = ''
-    }
-  }, true)
-}
 let currentMarkdownContent = ''
 
 // 初始化编辑器
@@ -265,14 +94,6 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
         lowlight,
         HTMLAttributes: {
           class: 'code-block',
-        },
-      }),
-      ImageResize.configure({
-        inline: true,
-        allowBase64: true,
-        allowResize: true,
-        HTMLAttributes: {
-          class: 'markdown-image',
         },
       }),
       Link.configure({
@@ -378,11 +199,8 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
   editorElement.addEventListener('click', (e) => {
     const target = e.target as HTMLElement
     
-    // 检查是否点击了图片或链接
-    if (target.tagName === 'IMG' && target.classList.contains('markdown-image')) {
-      e.preventDefault()
-      showSourceDialog('image', target)
-    } else if (target.tagName === 'A' && target.classList.contains('markdown-link')) {
+    // 检查是否点击了链接
+    if (target.tagName === 'A' && target.classList.contains('markdown-link')) {
       e.preventDefault()
       showSourceDialog('link', target)
     } else if (!editor.isFocused) {
@@ -401,19 +219,12 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
     }
   })
   
-  // 设置图片粘贴和拖拽处理
-  setupPasteHandler(editor)
-  setupDragDropHandler(editor)
-  
   // 设置表格工具栏和快捷键
   const tableToolbar = new TableToolbar(editor)
   setupTableShortcuts(editor)
   
   // 存储工具栏实例以便后续清理
   ;(editor as any).tableToolbar = tableToolbar
-  
-  // 设置图片错误处理和重试逻辑
-  setupImageErrorHandling()
   
   return editor
 }
@@ -612,12 +423,6 @@ function showSourceDialog(type: string, element: HTMLElement): void {
   let title = ''
   
   switch (type) {
-    case 'image':
-      const imgSrc = (element as HTMLImageElement).src
-      const imgAlt = (element as HTMLImageElement).alt || ''
-      sourceCode = `![${imgAlt}](${imgSrc})`
-      title = '图片源代码'
-      break
     case 'link':
       const linkHref = (element as HTMLAnchorElement).href
       const linkText = element.textContent || ''

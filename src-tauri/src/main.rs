@@ -9,11 +9,9 @@ use pulldown_cmark::{Parser, Options, html};
 use std::sync::Mutex;
 use std::sync::OnceLock;
 use std::env;
-use base64::{Engine as _, engine::general_purpose};
 use chrono::Local;
 use std::path::PathBuf;
 use dirs;
-use sha2::{Sha256, Digest};
 
 // 全局当前目录变量
 static CURRENT_DIRECTORY: OnceLock<Mutex<Option<String>>> = OnceLock::new();
@@ -362,89 +360,6 @@ fn render_markdown_to_html(markdown: &str) -> String {
     convert_markdown_to_html(markdown)
 }
 
-// 保存base64图片到本地
-#[tauri::command]
-fn save_image_from_base64(base64_data: &str, current_file_path: Option<&str>) -> Result<String, String> {
-    // 解析base64数据
-    let parts: Vec<&str> = base64_data.split(',').collect();
-    if parts.len() != 2 {
-        return Err("无效的base64图片数据".to_string());
-    }
-    
-    // 提取MIME类型和扩展名
-    let header = parts[0];
-    let extension = if header.contains("image/png") {
-        "png"
-    } else if header.contains("image/jpeg") || header.contains("image/jpg") {
-        "jpg"
-    } else if header.contains("image/gif") {
-        "gif"
-    } else if header.contains("image/webp") {
-        "webp"
-    } else {
-        "png" // 默认为png
-    };
-    
-    // 解码base64数据
-    let image_data = match general_purpose::STANDARD.decode(parts[1]) {
-        Ok(data) => data,
-        Err(e) => return Err(format!("解码base64数据失败: {}", e)),
-    };
-    
-    // 确定保存目录
-    let save_dir = if let Some(file_path) = current_file_path {
-        // 如果有当前文件路径，在同级目录创建images文件夹
-        let path = Path::new(file_path);
-        if let Some(parent) = path.parent() {
-            parent.join("images")
-        } else {
-            PathBuf::from("images")
-        }
-    } else {
-        // 否则在当前工作目录创建images文件夹
-        PathBuf::from("images")
-    };
-    
-    // 创建目录（如果不存在）
-    if !save_dir.exists() {
-        if let Err(e) = fs::create_dir_all(&save_dir) {
-            return Err(format!("创建图片目录失败: {}", e));
-        }
-    }
-    
-    // 使用图片内容的哈希值生成文件名，确保相同图片得到相同文件名
-    let mut hasher = Sha256::new();
-    hasher.update(&image_data);
-    let hash = hasher.finalize();
-    let hash_str = format!("{:x}", hash);
-    let filename = format!("image_{}.{}", &hash_str[0..16], extension);
-    let file_path = save_dir.join(&filename);
-    
-    // 如果文件已存在，直接返回路径（避免重复保存相同图片）
-    if file_path.exists() {
-        // 返回绝对路径
-        return match file_path.to_str() {
-            Some(path) => Ok(path.to_string()),
-            None => Err("无法获取文件路径".to_string()),
-        };
-    }
-    
-    // 保存文件
-    let mut file = match fs::File::create(&file_path) {
-        Ok(file) => file,
-        Err(e) => return Err(format!("创建文件失败: {}", e)),
-    };
-    
-    if let Err(e) = file.write_all(&image_data) {
-        return Err(format!("写入文件失败: {}", e));
-    }
-    
-    // 返回绝对路径
-    match file_path.to_str() {
-        Some(path) => Ok(path.to_string()),
-        None => Err("无法获取文件路径".to_string()),
-    }
-}
 
 // 添加文件到最近文件列表
 #[tauri::command]
@@ -638,7 +553,6 @@ fn main() {
             get_directory_children,
             get_raw_markdown,
             render_markdown_to_html,
-            save_image_from_base64,
             add_recent_file,
             get_recent_files,
             remove_recent_file,

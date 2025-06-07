@@ -278,12 +278,6 @@ function handleFABAction(action: string | null): void {
         editor.chain().focus().setLink({ href: url }).run()
       }
       break
-    case 'image':
-      const imgUrl = prompt('输入图片地址:')
-      if (imgUrl) {
-        editor.chain().focus().setImage({ src: imgUrl }).run()
-      }
-      break
     case 'table':
       editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
       break
