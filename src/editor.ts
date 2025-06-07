@@ -253,6 +253,14 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
     }
   })
   
+  // 监听模板应用事件
+  window.addEventListener('template-applied', () => {
+    const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
+    if (proseMirror) {
+      proseMirror.classList.remove('using-default-content')
+    }
+  })
+  
   // 添加失焦事件处理
   editor.on('blur', () => {
     // 检查内容是否为空

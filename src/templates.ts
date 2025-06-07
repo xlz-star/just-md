@@ -1122,7 +1122,7 @@ export class TemplateManager {
             <span class="template-author">${template.author || '系统'}</span>
             <span class="template-date">${this.formatDate(template.createdAt)}</span>
           </div>
-          <button class="btn-primary template-use-btn" onclick="templateManager.useTemplate('${template.id}')">
+          <button class="btn-primary template-use-btn" onclick="templateManager.useTemplate('${template.id}').catch(console.error)">
             使用模板
           </button>
         </div>
@@ -1137,13 +1137,57 @@ export class TemplateManager {
   }
 
   // 使用模板
-  public useTemplate(templateId: string): void {
+  public async useTemplate(templateId: string): Promise<void> {
     const template = this.templates.find(t => t.id === templateId);
     if (!template) return;
 
     const editor = getEditor();
     if (editor) {
-      editor.commands.setContent(template.content);
+      // 先获取焦点，确保编辑器准备好
+      editor.commands.focus();
+      
+      // 移除默认内容标记
+      const proseMirror = document.querySelector('.ProseMirror') as HTMLElement;
+      if (proseMirror) {
+        proseMirror.classList.remove('using-default-content');
+      }
+      
+      // 模板内容通常是Markdown格式，需要先转换为HTML
+      // 检查是否包含Markdown特征
+      const isMarkdown = template.content.match(/^#+ /m) || // 标题
+                        template.content.includes('**') || // 粗体
+                        template.content.includes('*') || // 斜体
+                        template.content.includes('- ') || // 列表
+                        template.content.includes('[') || // 链接
+                        template.content.includes('```') || // 代码块
+                        template.content.includes('|'); // 表格
+      
+      if (isMarkdown) {
+        // 调用后端API转换Markdown为HTML
+        try {
+          const { invoke } = await import('@tauri-apps/api/core');
+          const htmlContent = await invoke<string>('render_markdown_to_html', { 
+            markdown: template.content 
+          });
+          editor.commands.setContent(htmlContent);
+          
+          // 同时保存原始Markdown内容
+          (window as any).currentMarkdownContent = template.content;
+        } catch (error) {
+          console.error('转换模板内容失败:', error);
+          // 如果转换失败，直接设置内容（可能会显示原始Markdown）
+          editor.commands.setContent(template.content);
+        }
+      } else {
+        // 如果是HTML内容，直接设置
+        editor.commands.setContent(template.content);
+      }
+      
+      // 确保编辑器保持焦点
+      setTimeout(() => {
+        editor.commands.focus('end');
+      }, 100);
+      
       this.hideTemplates();
       
       // 触发内容变更事件
