@@ -92,19 +92,24 @@ function setupImageErrorHandling(): void {
       // 增加重试计数
       target.setAttribute('data-retry-count', (retryCount + 1).toString())
       
+      console.log(`重试加载图片 (${retryCount + 1}/${maxRetries}): ${originalSrc}`)
+      
       // 延迟重试，避免频繁请求
       setTimeout(() => {
-        console.log(`重试加载图片 (${retryCount + 1}/${maxRetries}): ${originalSrc}`)
+        // 在修改src之前再次检查是否已经达到最大重试次数
+        const currentRetryCount = parseInt(target.getAttribute('data-retry-count') || '0')
+        if (currentRetryCount > maxRetries) {
+          return
+        }
         
         // 添加时间戳避免缓存
         const separator = originalSrc.includes('?') ? '&' : '?'
-        target.src = `${originalSrc}${separator}_retry=${Date.now()}`
+        const newSrc = `${originalSrc}${separator}_retry=${Date.now()}`
         
-        // 重置重试标记
-        setTimeout(() => {
-          target.setAttribute('data-retrying', 'false')
-        }, 100)
-      }, 1000 * (retryCount + 1)) // 递增延迟时间
+        // 先清除重试标记，然后设置新的src
+        target.setAttribute('data-retrying', 'false')
+        target.src = newSrc
+      }, 1000 * retryCount) // 递增延迟时间，但使用当前重试次数
     } else {
       // 达到最大重试次数，显示错误占位符
       console.error(`图片加载失败，已达到最大重试次数: ${originalSrc}`)
@@ -130,14 +135,19 @@ function setupImageErrorHandling(): void {
   editorElement.addEventListener('load', (e) => {
     const target = e.target as HTMLImageElement
     if (target.tagName === 'IMG' && target.classList.contains('markdown-image')) {
+      // 重置所有重试相关的属性
       target.setAttribute('data-retry-count', '0')
+      target.setAttribute('data-retrying', 'false')
       target.classList.remove('image-load-error')
+      
+      // 清除错误样式
       target.style.border = ''
       target.style.padding = ''
       target.style.minHeight = ''
       target.style.backgroundColor = ''
       target.style.color = ''
       target.style.textAlign = ''
+      target.style.display = ''
     }
   }, true)
 }

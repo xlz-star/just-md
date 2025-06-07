@@ -13,12 +13,19 @@ export function initWordCount(): void {
   
   const editor = getEditor()
   if (editor) {
-    // Initial count
-    updateWordCount()
+    // Delay initial count to ensure editor is fully initialized
+    setTimeout(() => {
+      updateWordCount()
+    }, 100)
     
     // Update on content change with optimized debounce
     editor.on('update', () => {
       performanceMonitor.recordOperation('word-count-update')
+      debouncedUpdate()
+    })
+    
+    // Also update on selection change to handle focus events
+    editor.on('selectionUpdate', () => {
       debouncedUpdate()
     })
   }
@@ -66,7 +73,14 @@ function updateWordCount(): void {
   const editor = getEditor()
   if (!editor || !wordCountElement) return
   
-  const text = editor.state.doc.textContent
+  // 获取纯文本内容，去除HTML标签和特殊字符
+  let text = editor.state.doc.textContent
+  
+  // 过滤掉一些特殊字符和空白字符
+  text = text
+    .replace(/[\u200B-\u200D\uFEFF]/g, '') // 零宽字符
+    .replace(/\u00A0/g, ' ') // 不间断空格
+    .trim()
   
   // 避免不必要的重计算
   if (text === lastContent) return
@@ -80,10 +94,17 @@ function updateWordCount(): void {
     performanceMonitor.measureRender('word-count', () => {
       // Count words (Chinese and English) - 优化正则表达式
       const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length
-      const englishWords = text
-        .replace(/[\u4e00-\u9fa5]/g, ' ')
-        .split(/\s+/)
-        .filter(word => word.length > 0).length
+      
+      // 更准确的英文单词计数
+      const englishText = text
+        .replace(/[\u4e00-\u9fa5]/g, ' ') // 替换中文为空格
+        .replace(/[^\w\s]/g, ' ') // 替换标点符号为空格
+        .trim()
+      
+      const englishWords = englishText
+        ? englishText.split(/\s+/).filter(word => word.length > 1).length
+        : 0
+      
       const totalWords = chineseChars + englishWords
       
       // Count characters (excluding spaces)
@@ -138,14 +159,25 @@ function showDetailedStats(): void {
   const editor = getEditor()
   if (!editor) return
   
-  const text = editor.state.doc.textContent
+  // 获取纯文本内容，去除HTML标签和特殊字符
+  let text = editor.state.doc.textContent
+  text = text
+    .replace(/[\u200B-\u200D\uFEFF]/g, '') // 零宽字符
+    .replace(/\u00A0/g, ' ') // 不间断空格
+    .trim()
   
   // Detailed statistics
   const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length
-  const englishWords = text
-    .replace(/[\u4e00-\u9fa5]/g, ' ')
-    .split(/\s+/)
-    .filter(word => word.length > 0).length
+  
+  // 更准确的英文单词计数
+  const englishText = text
+    .replace(/[\u4e00-\u9fa5]/g, ' ') // 替换中文为空格
+    .replace(/[^\w\s]/g, ' ') // 替换标点符号为空格
+    .trim()
+  
+  const englishWords = englishText
+    ? englishText.split(/\s+/).filter(word => word.length > 1).length
+    : 0
   const totalChars = text.length
   const charsNoSpaces = text.replace(/\s/g, '').length
   const lines = text.split('\n').length
