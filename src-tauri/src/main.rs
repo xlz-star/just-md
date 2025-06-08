@@ -3,14 +3,13 @@
 
 use std::fs;
 use std::io::{Read, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use pulldown_cmark::{Parser, Options, html};
 use std::sync::Mutex;
 use std::sync::OnceLock;
 use std::env;
 use chrono::Local;
-use std::path::PathBuf;
 use dirs;
 
 // 全局当前目录变量
@@ -475,6 +474,105 @@ fn clear_recent_files() -> Result<(), String> {
     Ok(())
 }
 
+// 复制图片到文档目录
+#[tauri::command]
+fn copy_image_to_document_dir(image_path: &str, document_path: &str) -> Result<String, String> {
+    // 检查源图片是否存在
+    let source_path = Path::new(image_path);
+    if !source_path.exists() {
+        return Err("源图片文件不存在".to_string());
+    }
+    
+    // 获取文档所在目录
+    let doc_path = Path::new(document_path);
+    let doc_dir = match doc_path.parent() {
+        Some(dir) => dir,
+        None => return Err("无法获取文档目录".to_string()),
+    };
+    
+    // 创建 images 子目录
+    let images_dir = doc_dir.join("images");
+    if !images_dir.exists() {
+        if let Err(e) = fs::create_dir_all(&images_dir) {
+            return Err(format!("创建 images 目录失败: {}", e));
+        }
+    }
+    
+    // 获取原始文件名
+    let file_name = match source_path.file_name() {
+        Some(name) => name,
+        None => return Err("无法获取文件名".to_string()),
+    };
+    
+    // 目标文件路径
+    let target_path = images_dir.join(file_name);
+    
+    // 如果目标文件已存在，检查是否是同一个文件
+    if target_path.exists() {
+        // 比较文件大小，如果相同则认为是同一个文件
+        let source_metadata = match fs::metadata(&source_path) {
+            Ok(m) => m,
+            Err(e) => return Err(format!("读取源文件信息失败: {}", e)),
+        };
+        
+        let target_metadata = match fs::metadata(&target_path) {
+            Ok(m) => m,
+            Err(e) => return Err(format!("读取目标文件信息失败: {}", e)),
+        };
+        
+        if source_metadata.len() == target_metadata.len() {
+            // 文件大小相同，假定是同一个文件，直接返回相对路径
+            return Ok(format!("./images/{}", file_name.to_string_lossy()));
+        }
+    }
+    
+    // 复制文件
+    if let Err(e) = fs::copy(&source_path, &target_path) {
+        return Err(format!("复制图片失败: {}", e));
+    }
+    
+    // 返回相对路径
+    Ok(format!("./images/{}", file_name.to_string_lossy()))
+}
+
+// 读取图片为 Base64
+#[tauri::command]
+fn read_image_as_base64(image_path: &str) -> Result<String, String> {
+    // 读取图片文件
+    let mut file = match fs::File::open(image_path) {
+        Ok(f) => f,
+        Err(e) => return Err(format!("打开图片文件失败: {}", e)),
+    };
+    
+    let mut buffer = Vec::new();
+    if let Err(e) = file.read_to_end(&mut buffer) {
+        return Err(format!("读取图片文件失败: {}", e));
+    }
+    
+    // 获取文件扩展名来确定 MIME 类型
+    let path = Path::new(image_path);
+    let extension = path.extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("png")
+        .to_lowercase();
+    
+    let mime_type = match extension.as_str() {
+        "jpg" | "jpeg" => "image/jpeg",
+        "png" => "image/png",
+        "gif" => "image/gif",
+        "webp" => "image/webp",
+        "svg" => "image/svg+xml",
+        _ => "image/png",
+    };
+    
+    // 转换为 Base64
+    use base64::{Engine as _, engine::general_purpose};
+    let base64_string = general_purpose::STANDARD.encode(&buffer);
+    
+    // 返回 data URL
+    Ok(format!("data:{};base64,{}", mime_type, base64_string))
+}
+
 // 导出为PDF（简单实现，通过HTML）
 #[tauri::command]
 fn export_to_pdf(_markdown: &str, _output_path: &str) -> Result<(), String> {
@@ -558,6 +656,8 @@ fn main() {
             remove_recent_file,
             clear_recent_files,
             export_to_pdf,
+            copy_image_to_document_dir,
+            read_image_as_base64,
             set_current_directory,
             get_cli_args,
             get_initial_file

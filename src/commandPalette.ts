@@ -1,4 +1,5 @@
 import { getEditor } from './editor'
+import { ImageInsertManager } from './markdownImage'
 import { openFile, saveFile, openFolder } from './fileManager'
 import { toggleFindReplace } from './findReplace'
 import { exportToHTML, exportToPDF } from './export'
@@ -153,6 +154,19 @@ const commands: Command[] = [
       const url = prompt('输入链接地址:')
       if (url) {
         getEditor()?.chain().focus().setLink({ href: url }).run()
+      }
+    }
+  },
+  {
+    id: 'insert.image',
+    name: '插入图片',
+    shortcut: 'Ctrl+Shift+I',
+    category: '插入',
+    action: () => {
+      const editor = getEditor()
+      if (editor) {
+        const imageManager = new ImageInsertManager(editor)
+        imageManager.showInsertDialog()
       }
     }
   },

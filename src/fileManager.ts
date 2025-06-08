@@ -4,6 +4,7 @@ import { OpenedFile } from './types'
 import { getEditorContent, setEditorContent, setCurrentFile, getCurrentFilePath, getCurrentMarkdownContent } from './editor'
 import { resetOutlineState, updateOutlineIfNeeded } from './outline'
 import { recentFilesManager } from './recentFiles'
+import { processImagePaths } from './markdownImage'
 
 // 动态导入以避免循环引用
 let filetreeModulePromise: Promise<any> | null = null;
@@ -62,6 +63,9 @@ export async function openFile(): Promise<void> {
         const markdownContent = await invoke<string>('get_raw_markdown', { path: selected })
         
         if (htmlContent && markdownContent) {
+          // 处理HTML中的图片路径
+          htmlContent = processImagePaths(htmlContent, selected)
+          
           // 创建文件对象，保存原始Markdown内容
           const file: OpenedFile = {
             id: generateId(),
@@ -277,6 +281,11 @@ export async function switchToFile(index: number): Promise<void> {
   try {
     // 渲染Markdown内容为HTML
     let htmlContent = await invoke<string>('render_markdown_to_html', { markdown: file.content })
+    
+    // 处理HTML中的图片路径
+    if (file.path) {
+      htmlContent = processImagePaths(htmlContent, file.path)
+    }
     
     // 更新编辑器内容为渲染后的HTML，同时传入原始Markdown
     setEditorContent(htmlContent, file.content)

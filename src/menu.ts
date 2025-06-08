@@ -8,6 +8,7 @@ import { toggleSplitView } from './splitView'
 import { showPrintPreview } from './printPreview'
 import { toggleFocusMode, toggleTypewriterMode } from './focusMode'
 import { showFullSourceEditor } from './sourceEditor'
+import { ImageInsertManager } from './markdownImage'
 import { showRecentFilesDialog } from './recentFilesDialog'
 
 // 初始化菜单
@@ -184,6 +185,16 @@ export function initKeyboardShortcuts(): void {
       e.preventDefault()
       const editor = getEditor()
       editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+    }
+    
+    // Ctrl+Shift+I 插入图片
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'I') {
+      e.preventDefault()
+      const editor = getEditor()
+      if (editor) {
+        const imageManager = new ImageInsertManager(editor)
+        imageManager.showInsertDialog()
+      }
     }
     
     // Ctrl+\ 切换分屏视图
