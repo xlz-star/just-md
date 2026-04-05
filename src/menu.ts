@@ -168,8 +168,8 @@ export function initKeyboardShortcuts(): void {
       openFile()
     }
     
-    // Ctrl+K 打开文件夹
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    // Ctrl+Shift+K 打开文件夹（避免覆盖 Tiptap 的 Ctrl+K 插入链接）
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'K') {
       e.preventDefault()
       openFolder()
     }

@@ -1,7 +1,7 @@
 import { initEditor, initDragAndDrop, setEditorContent, setCurrentFile } from './editor'
 import { initOutlineFeature, resetOutlineState, updateOutlineIfNeeded } from './outline'
 import { initMenus, initKeyboardShortcuts } from './menu'
-import { handleFileDrop, saveFile, addFileTab, generateId } from './fileManager'
+import { handleFileDrop, saveFile, addFileTab, generateId, getActiveFile, updateFileDirtyState } from './fileManager'
 import { initFindReplace } from './findReplace'
 import { initWordCount } from './wordCount'
 import { initThemes } from './themes'
@@ -13,6 +13,7 @@ import { initTocGenerator } from './tocGenerator'
 import { initFocusMode } from './focusMode'
 import { initSettings } from './settings'
 import { initSourceEditor } from './sourceEditor'
+import { initImageContextMenu } from './imageContextMenu'
 import { UIAnimations } from './uiAnimations'
 import { initSpellCheck } from './spellCheck'
 import { initWritingStats } from './writingStats'
@@ -34,10 +35,12 @@ async function main() {
     initCodeQuality()
     
     // 初始化编辑器，并添加内容变化回调
-    initEditor('', (isDirty: boolean) => {
-      // 在此处理编辑器内容变化
-      // 例如标记文件为已编辑
-      console.log('编辑器内容已变化，脏状态:', isDirty)
+    initEditor('', (_isDirty: boolean) => {
+      // 标记当前活动文件为已编辑（dirty）
+      const activeFile = getActiveFile()
+      if (activeFile && !activeFile.isDirty) {
+        updateFileDirtyState(activeFile.id, true)
+      }
     })
 
     // 初始化拖放文件功能
@@ -96,6 +99,9 @@ async function main() {
     
     // 初始化源码编辑器
     initSourceEditor()
+    
+    // 初始化图片右键菜单
+    initImageContextMenu()
     
     // 延迟初始化字数统计功能，确保编辑器已创建
     setTimeout(() => {

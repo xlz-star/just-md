@@ -144,7 +144,6 @@ export const SearchExtension = Extension.create({
 
 function performSearch(doc: any, options: SearchOptions): SearchResult[] {
   const results: SearchResult[] = []
-  const text = doc.textContent
   
   if (!options.searchTerm) return results
   
@@ -163,13 +162,20 @@ function performSearch(doc: any, options: SearchOptions): SearchResult[] {
     return results
   }
   
-  let match
-  while ((match = regex.exec(text)) !== null) {
-    results.push({
-      from: match.index,
-      to: match.index + match[0].length,
-    })
-  }
+  // 遍历文档中所有文本节点，用文档节点位置而非纯文本偏移量
+  doc.descendants((node: any, pos: number) => {
+    if (!node.isText || !node.text) return
+    
+    const text = node.text
+    regex.lastIndex = 0
+    let match
+    while ((match = regex.exec(text)) !== null) {
+      results.push({
+        from: pos + match.index,
+        to: pos + match.index + match[0].length,
+      })
+    }
+  })
   
   return results
 }

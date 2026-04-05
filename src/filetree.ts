@@ -239,8 +239,8 @@ function renderFileTreeContent(): void {
               // 重置大纲结构
               resetOutlineState()
               
-              // 设置编辑器内容为渲染后的HTML
-              setEditorContent(htmlContent)
+              // 设置编辑器内容为渲染后的HTML，同时传入原始Markdown
+              setEditorContent(htmlContent, markdownContent)
               
               // 确保编辑器内容不是默认样式
               const proseMirror = document.querySelector('.ProseMirror') as HTMLElement

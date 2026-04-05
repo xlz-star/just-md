@@ -4,6 +4,7 @@ import { updateOutlineIfNeeded } from './outline.ts'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { createLowlight } from 'lowlight'
 import Link from '@tiptap/extension-link'
+import Image from '@tiptap/extension-image'
 import Table from '@tiptap/extension-table'
 import TableRow from '@tiptap/extension-table-row'
 import TableCell from '@tiptap/extension-table-cell'
@@ -11,6 +12,8 @@ import TableHeader from '@tiptap/extension-table-header'
 import { SearchExtension } from './searchExtension'
 import { MathInline, MathBlock } from './mathExtension'
 import { Footnote } from './footnoteExtension'
+import { AutoImageExtension } from './autoImageExtension'
+import { ImageContextMenu } from './imageContextMenu'
 import { TableToolbar, setupTableShortcuts } from './tableToolbar'
 import { SpellCheckExtension } from './spellCheck'
 import 'highlight.js/styles/github.css'
@@ -90,7 +93,46 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
       StarterKit.configure({
         codeBlock: false, // 禁用默认的代码块，使用自定义的
       }),
-      CodeBlockLowlight.configure({
+      CodeBlockLowlight.extend({
+        addKeyboardShortcuts() {
+          return {
+            ...this.parent?.(),
+            'Mod-a': ({ editor }) => {
+              const { state } = editor
+              const { selection, doc } = state
+              const { $from, $to } = selection
+
+              // 检查选区是否在代码块内
+              let codeBlockNode: any = null
+              let codeBlockPos = 0
+              let codeBlockSize = 0
+
+              doc.descendants((node, pos) => {
+                if (node.type.name === 'codeBlock') {
+                  const nodeEnd = pos + node.nodeSize
+                  if ($from.pos >= pos && $to.pos <= nodeEnd) {
+                    codeBlockNode = node
+                    codeBlockPos = pos
+                    codeBlockSize = node.nodeSize
+                    return false
+                  }
+                }
+              })
+
+              if (codeBlockNode) {
+                // 在代码块内，只选中代码内容（不包括节点本身的标记）
+                const contentStart = codeBlockPos + 1
+                const contentEnd = codeBlockPos + codeBlockSize - 1
+                editor.commands.setTextSelection({ from: contentStart, to: contentEnd })
+                return true
+              }
+
+              // 不在代码块内，执行默认的全选行为
+              return false
+            },
+          }
+        },
+      }).configure({
         lowlight,
         HTMLAttributes: {
           class: 'code-block',
@@ -116,6 +158,14 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
       MathInline,
       MathBlock,
       Footnote,
+      AutoImageExtension,
+      Image.configure({
+        HTMLAttributes: {
+          class: 'markdown-image',
+        },
+        inline: true,
+      }),
+      ImageContextMenu,
     ],
     content: content || defaultContent,
     editorProps: {

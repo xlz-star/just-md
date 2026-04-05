@@ -317,6 +317,12 @@ export function closeFile(index: number): void {
   
   const file = openedFiles[index]
   
+  // 如果文件有未保存的更改，提示用户
+  if (file.isDirty) {
+    const confirmed = confirm(`文件 "${file.name}" 有未保存的更改，确定要关闭吗？`)
+    if (!confirmed) return
+  }
+  
   // 从DOM中移除标签
   const tabElement = document.querySelector(`.file-tab[data-id="${file.id}"]`)
   if (tabElement) {

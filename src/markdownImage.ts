@@ -186,32 +186,35 @@ export function processImagePaths(html: string, documentPath: string): string {
 
 // 解析相对路径
 function resolveRelativePath(relativePath: string, documentPath: string): string {
-  // 获取文档目录
+  // 获取文档目录，保留原始分隔符风格（Windows 用 \，Unix 用 /）
+  const sep = documentPath.includes('\\') ? '\\' : '/';
   const parts = documentPath.split(/[/\\]/);
   parts.pop(); // 移除文件名
-  const docDir = parts.join('/');
+  const docDir = parts.join(sep);
+
+  // 统一相对路径中的分隔符为当前平台风格
+  const normalizedRelative = relativePath.replace(/\//g, sep);
 
   // 处理相对路径
-  if (relativePath.startsWith('./')) {
-    return docDir + '/' + relativePath.substring(2);
-  } else if (relativePath.startsWith('../')) {
-    // 处理 ../ 路径
-    let path = relativePath;
+  if (normalizedRelative.startsWith('.' + sep)) {
+    return docDir + sep + normalizedRelative.substring(2);
+  } else if (normalizedRelative.startsWith('..' + sep)) {
+    let path = normalizedRelative;
     let dir = docDir;
-    
-    while (path.startsWith('../')) {
+
+    while (path.startsWith('..' + sep)) {
       path = path.substring(3);
-      const dirParts = dir.split('/');
+      const dirParts = dir.split(sep);
       dirParts.pop();
-      dir = dirParts.join('/');
+      dir = dirParts.join(sep);
     }
-    
-    return dir + '/' + path;
-  } else if (!relativePath.startsWith('/')) {
-    // 相对路径但不以 ./ 开头
-    return docDir + '/' + relativePath;
+
+    return dir + sep + path;
+  } else if (!relativePath.startsWith('/') && !relativePath.startsWith('\\')) {
+    // 相对路径但不以 ./ 或 ../ 开头
+    return docDir + sep + normalizedRelative;
   }
-  
+
   return relativePath;
 }
 

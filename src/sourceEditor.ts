@@ -1,4 +1,5 @@
-import { getEditor } from './editor'
+import { getEditor, getCurrentMarkdownContent } from './editor'
+import { invoke } from '@tauri-apps/api/core'
 
 let sourceEditModal: HTMLElement | null = null
 
@@ -201,27 +202,42 @@ function saveSourceEdit(): void {
       return false
     }
   })
-  
-  if (found) {
-    // Replace the content at the found position
-    try {
-      const view = editor.view
-      const node = view.state.doc.nodeAt(pos)
-      if (node) {
-        const from = pos
-        const to = pos + node.nodeSize
-        editor.chain()
-          .focus()
-          .setTextSelection({ from, to })
-          .deleteRange({ from, to })
-          .insertContent(newMarkdown)
-          .run()
+
+  // 将 Markdown 转换为 HTML 后再插入，避免直接插入纯文本（Bug6 修复）
+  invoke<string>('render_markdown_to_html', { markdown: newMarkdown })
+    .then(html => {
+      if (found) {
+        try {
+          const node = editor.view.state.doc.nodeAt(pos)
+          if (node) {
+            const from = pos
+            const to = pos + node.nodeSize
+            editor.chain()
+              .focus()
+              .deleteRange({ from, to })
+              .insertContentAt(from, html)
+              .run()
+          }
+        } catch (error) {
+          editor.commands.setContent(html)
+        }
+      } else {
+        editor.commands.setContent(html)
       }
-    } catch (error) {
-      // Fallback: replace all content with new markdown
-      editor.commands.setContent(newMarkdown)
-    }
-  }
+    })
+    .catch(() => {
+      // 后端转换失败时降级：直接插入（保留原行为）
+      if (found) {
+        const node = editor.view.state.doc.nodeAt(pos)
+        if (node) {
+          editor.chain()
+            .focus()
+            .deleteRange({ from: pos, to: pos + node.nodeSize })
+            .insertContentAt(pos, newMarkdown)
+            .run()
+        }
+      }
+    })
   
   closeSourceEditor()
 }
@@ -251,7 +267,7 @@ export function showFullSourceEditor(): void {
   document.body.appendChild(modal)
   
   // Get current content as markdown
-  const content = editor.storage.markdown.getMarkdown()
+  const content = getCurrentMarkdownContent()
   const textarea = document.getElementById('full-source-textarea') as HTMLTextAreaElement
   if (textarea) {
     textarea.value = content

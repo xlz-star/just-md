@@ -121,10 +121,8 @@ export async function exportToPDF(): Promise<void> {
         })
         console.log('Exported to PDF:', savePath)
       } catch (err) {
-        // Show alternative solution
-        alert('PDF导出功能需要安装额外的依赖。\n\n请先导出为HTML，然后使用浏览器的打印功能保存为PDF。')
-        // Export to HTML instead
-        await exportToHTML()
+        // 告知用户 PDF 导出不可用，不再自动跳转到 HTML 导出（避免重复弹出保存框）
+        alert('PDF导出功能需要安装额外的依赖。\n\n请使用"导出为 HTML"功能，然后用浏览器打印为 PDF。')
       }
     }
   } catch (error) {

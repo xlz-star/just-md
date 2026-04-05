@@ -7,6 +7,10 @@ let previewPane: HTMLElement | null = null
 let editorPane: HTMLElement | null = null
 let updateTimer: number | null = null
 
+// 保存拖拽相关的全局监听器引用，以便之后移除
+let resizerMouseMove: ((e: MouseEvent) => void) | null = null
+let resizerMouseUp: (() => void) | null = null
+
 export function initSplitView(): void {
   createSplitViewButton()
 }
@@ -108,6 +112,16 @@ function disableSplitView(): void {
   if (editorInstance) {
     editorInstance.off('update', debounceUpdate)
   }
+
+  // 移除全局拖拽监听器（Bug8 修复）
+  if (resizerMouseMove) {
+    document.removeEventListener('mousemove', resizerMouseMove)
+    resizerMouseMove = null
+  }
+  if (resizerMouseUp) {
+    document.removeEventListener('mouseup', resizerMouseUp)
+    resizerMouseUp = null
+  }
   
   // Clear references
   splitViewContainer = null
@@ -138,8 +152,9 @@ function initResizer(resizer: HTMLElement): void {
     
     document.body.classList.add('resizing-split')
   })
-  
-  document.addEventListener('mousemove', (e) => {
+
+  // 保存监听器引用以便清理（Bug8 修复）
+  resizerMouseMove = (e: MouseEvent) => {
     if (!isResizing || !editorPane || !previewPane) return
     
     const deltaX = e.clientX - startX
@@ -151,14 +166,17 @@ function initResizer(resizer: HTMLElement): void {
       editorPane.style.width = `${newWidthLeft}px`
       previewPane.style.width = `${newWidthRight}px`
     }
-  })
-  
-  document.addEventListener('mouseup', () => {
+  }
+
+  resizerMouseUp = () => {
     if (isResizing) {
       isResizing = false
       document.body.classList.remove('resizing-split')
     }
-  })
+  }
+  
+  document.addEventListener('mousemove', resizerMouseMove)
+  document.addEventListener('mouseup', resizerMouseUp)
 }
 
 function debounceUpdate(): void {
@@ -173,13 +191,20 @@ function debounceUpdate(): void {
 
 async function updatePreview(): Promise<void> {
   if (!previewPane || !splitViewEnabled) return
-  
+
+  // Bug5 修复：优先使用已保存的 Markdown；若为空则从编辑器 HTML 降级渲染
   const markdown = getCurrentMarkdownContent()
-  if (!markdown) return
-  
+  const editorInstance = getEditor()
+  if (!markdown && !editorInstance) return
+
   try {
-    // Convert markdown to HTML
-    const html = await invoke<string>('render_markdown_to_html', { markdown })
+    let html: string
+    if (markdown) {
+      html = await invoke<string>('render_markdown_to_html', { markdown })
+    } else {
+      // 降级：直接把编辑器当前 HTML 作为预览（无 Markdown 时）
+      html = editorInstance!.getHTML()
+    }
     
     const previewContent = previewPane.querySelector('.preview-content')
     if (previewContent) {

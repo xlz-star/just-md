@@ -3443,6 +3443,93 @@ body.dark-mode .image-resize-wrapper:hover img {
   transition: none;
 }
 
+/* 图片右键菜单样式 */
+.image-context-menu {
+  position: fixed;
+  z-index: 10000;
+  background: var(--bg-primary, #ffffff);
+  border: 1px solid var(--border-color, #e1e5e9);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 6px 0;
+  min-width: 180px;
+  animation: context-menu-fade-in 0.15s ease;
+}
+
+@keyframes context-menu-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-size: 13px;
+  color: var(--text-primary, #333);
+}
+
+.context-menu-item:hover {
+  background: var(--bg-hover, #f0f4f8);
+}
+
+.context-menu-item i {
+  font-size: 16px;
+  color: var(--text-secondary, #666);
+  width: 18px;
+  text-align: center;
+}
+
+.context-menu-divider {
+  height: 1px;
+  background: var(--border-color, #e1e5e9);
+  margin: 4px 0;
+}
+
+.context-menu-item[data-action="delete-image"] {
+  color: #e03131;
+}
+
+.context-menu-item[data-action="delete-image"]:hover {
+  background: rgba(224, 49, 49, 0.08);
+}
+
+.context-menu-item[data-action="delete-image"] i {
+  color: #e03131;
+}
+
+/* 暗色模式下的右键菜单 */
+body.dark-mode .image-context-menu {
+  background: var(--bg-primary, #1e1e1e);
+  border-color: var(--border-color, #333);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .context-menu-item {
+  color: var(--text-primary, #e0e0e0);
+}
+
+body.dark-mode .context-menu-item:hover {
+  background: var(--bg-hover, #2d2d2d);
+}
+
+body.dark-mode .context-menu-item i {
+  color: var(--text-secondary, #aaa);
+}
+
+body.dark-mode .context-menu-divider {
+  background: var(--border-color, #333);
+}
+
 /* 表格样式增强 */
 .markdown-table {
   border-collapse: collapse;

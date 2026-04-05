@@ -573,6 +573,30 @@ fn read_image_as_base64(image_path: &str) -> Result<String, String> {
     Ok(format!("data:{};base64,{}", mime_type, base64_string))
 }
 
+// 保存临时图片并返回 base64 data URL（用于剪贴板粘贴）
+#[tauri::command]
+fn save_temp_image(data: Vec<u8>, file_type: &str) -> Result<String, String> {
+    use base64::{Engine as _, engine::general_purpose};
+    
+    // 确定 MIME 类型
+    let mime_type = match file_type {
+        "image/jpeg" | "image/jpg" => "image/jpeg",
+        "image/png" => "image/png",
+        "image/gif" => "image/gif",
+        "image/webp" => "image/webp",
+        "image/svg+xml" => "image/svg+xml",
+        "image/bmp" => "image/bmp",
+        "image/tiff" => "image/tiff",
+        _ => "image/png",
+    };
+    
+    // 转换为 base64
+    let base64_string = general_purpose::STANDARD.encode(&data);
+    
+    // 返回 data URL
+    Ok(format!("data:{};base64,{}", mime_type, base64_string))
+}
+
 // 导出为PDF（简单实现，通过HTML）
 #[tauri::command]
 fn export_to_pdf(_markdown: &str, _output_path: &str) -> Result<(), String> {
@@ -658,6 +682,7 @@ fn main() {
             export_to_pdf,
             copy_image_to_document_dir,
             read_image_as_base64,
+            save_temp_image,
             set_current_directory,
             get_cli_args,
             get_initial_file

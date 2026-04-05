@@ -156,6 +156,10 @@ function createSettingsPanel(): void {
               <span class="shortcut-key">Ctrl+K</span>
             </div>
             <div class="shortcut-item">
+              <span class="shortcut-desc">打开文件夹</span>
+              <span class="shortcut-key">Ctrl+Shift+K</span>
+            </div>
+            <div class="shortcut-item">
               <span class="shortcut-desc">切换粗体</span>
               <span class="shortcut-key">Ctrl+B</span>
             </div>
