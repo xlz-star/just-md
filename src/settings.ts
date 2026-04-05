@@ -116,12 +116,6 @@ function createSettingsPanel(): void {
               </button>
             </div>
             <div class="tool-item">
-              <button class="tool-btn" id="split-view-tool">
-                <i class="ri-layout-column-line"></i>
-                <span>分屏视图</span>
-              </button>
-            </div>
-            <div class="tool-item">
               <button class="tool-btn" id="template-tool">
                 <i class="ri-file-add-line"></i>
                 <span>文档模板</span>
@@ -255,12 +249,6 @@ function createSettingsPanel(): void {
         showTocDialog()
         break
         
-      case 'split-view-tool':
-        // Import and call split view toggle
-        const { toggleSplitView } = await import('./splitView')
-        toggleSplitView()
-        setTimeout(() => updateSplitViewToolIcon(), 100)
-        break
         
       case 'template-tool':
         // Import and call templates
@@ -365,18 +353,3 @@ export function isSettingsOpen(): boolean {
   return settingsPanel ? !settingsPanel.classList.contains('hidden') : false
 }
 
-function updateSplitViewToolIcon(): void {
-  const splitViewToolBtn = document.getElementById('split-view-tool')
-  if (!splitViewToolBtn) return
-  
-  const icon = splitViewToolBtn.querySelector('i')
-  if (!icon) return
-  
-  // Check if split view is enabled by looking at the main container
-  const mainContent = document.getElementById('main-content')
-  if (mainContent?.classList.contains('split-view')) {
-    icon.className = 'ri-layout-row-line'
-  } else {
-    icon.className = 'ri-layout-column-line'
-  }
-}

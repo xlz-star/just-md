@@ -5,7 +5,6 @@ import { handleFileDrop, saveFile, addFileTab, generateId, getActiveFile, update
 import { initFindReplace } from './findReplace'
 import { initWordCount } from './wordCount'
 import { initThemes } from './themes'
-import { initSplitView } from './splitView'
 import { initAutoSave } from './autoSave'
 import { initCodeFolding } from './codeFolding'
 import { initPrintPreview } from './printPreview'
@@ -60,9 +59,6 @@ async function main() {
     
     // 初始化主题系统
     initThemes()
-    
-    // 初始化分屏视图
-    initSplitView()
     
     // 初始化自动保存
     initAutoSave()

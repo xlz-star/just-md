@@ -88,25 +88,39 @@ function hideContextMenu(): void {
   menuState.imgElement = null
 }
 
-function setImageScale(img: HTMLImageElement, scale: number): void {
-  const wrapper = img.closest('.image-resize-wrapper') || img.parentElement
-  if (wrapper) {
-    ;(wrapper as HTMLElement).style.transform = `scale(${scale})`
-    ;(wrapper as HTMLElement).style.transformOrigin = 'top left'
-    ;(wrapper as HTMLElement).dataset.scale = scale.toString()
-  } else {
-    img.style.transform = `scale(${scale})`
-    img.style.transformOrigin = 'top left'
-    ;(img as HTMLElement).dataset.scale = scale.toString()
-  }
+// 图片缩放管理：通过存储原始宽度和当前缩放比来控制显示
+interface ImageScaleData {
+  naturalWidth: number
+  scale: number
 }
 
-function getImageScale(img: HTMLImageElement): number {
-  const wrapper = img.closest('.image-resize-wrapper') || img.parentElement
-  if (wrapper) {
-    return parseFloat((wrapper as HTMLElement).dataset.scale || '1')
+const imageScaleMap = new WeakMap<HTMLImageElement, ImageScaleData>()
+
+function getImageScaleData(img: HTMLImageElement): ImageScaleData {
+  let data = imageScaleMap.get(img)
+  if (!data) {
+    data = {
+      naturalWidth: img.naturalWidth || img.clientWidth || 300,
+      scale: 1,
+    }
+    imageScaleMap.set(img, data)
   }
-  return parseFloat((img as HTMLElement).dataset.scale || '1') || 1
+  return data
+}
+
+function setImageScale(img: HTMLImageElement, scale: number): void {
+  const data = getImageScaleData(img)
+  data.scale = Math.max(0.1, Math.min(scale, 5))
+  const targetWidth = Math.round(data.naturalWidth * data.scale)
+  img.style.width = `${targetWidth}px`
+  img.style.height = 'auto'
+  img.style.maxWidth = 'none'
+  img.dataset.scale = data.scale.toFixed(2)
+}
+
+function getDisplayScale(img: HTMLImageElement): number {
+  const data = getImageScaleData(img)
+  return data.scale
 }
 
 async function copyImageToClipboard(img: HTMLImageElement): Promise<void> {
@@ -194,13 +208,13 @@ export function initImageContextMenu(): void {
 
       switch (action) {
         case 'zoom-in': {
-          const currentScale = getImageScale(img)
-          setImageScale(img, Math.min(currentScale + 0.25, 3))
+          const currentScale = getDisplayScale(img)
+          setImageScale(img, currentScale + 0.25)
           break
         }
         case 'zoom-out': {
-          const currentScale = getImageScale(img)
-          setImageScale(img, Math.max(currentScale - 0.25, 0.25))
+          const currentScale = getDisplayScale(img)
+          setImageScale(img, Math.max(currentScale - 0.25, 0.1))
           break
         }
         case 'reset-size':
@@ -210,9 +224,9 @@ export function initImageContextMenu(): void {
           const editorEl = document.querySelector('.ProseMirror') as HTMLElement
           if (editorEl) {
             const editorWidth = editorEl.clientWidth - 40
-            const naturalWidth = img.naturalWidth
-            if (naturalWidth > 0) {
-              const scale = editorWidth / naturalWidth
+            const data = getImageScaleData(img)
+            if (data.naturalWidth > 0) {
+              const scale = editorWidth / data.naturalWidth
               setImageScale(img, Math.min(scale, 1))
             }
           }

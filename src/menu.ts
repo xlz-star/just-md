@@ -4,7 +4,6 @@ import { getEditor } from './editor'
 import { toggleFindReplace } from './findReplace'
 import { exportToHTML, exportToPDF } from './export'
 import { showThemeSelector } from './themes'
-import { toggleSplitView } from './splitView'
 import { showPrintPreview } from './printPreview'
 import { toggleFocusMode, toggleTypewriterMode } from './focusMode'
 import { showFullSourceEditor } from './sourceEditor'
@@ -34,7 +33,6 @@ export function initMenus(): void {
   const insertFootnoteItem = document.getElementById('insert-footnote')
   
   // 视图菜单项
-  const toggleSplitViewItem = document.getElementById('toggle-split-view')
   const selectThemeItem = document.getElementById('select-theme')
   const toggleFocusModeItem = document.getElementById('toggle-focus-mode')
   const toggleTypewriterModeItem = document.getElementById('toggle-typewriter-mode')
@@ -137,7 +135,6 @@ export function initMenus(): void {
   })
   
   // 视图菜单项事件
-  toggleSplitViewItem?.addEventListener('click', toggleSplitView)
   selectThemeItem?.addEventListener('click', showThemeSelector)
   toggleFocusModeItem?.addEventListener('click', toggleFocusMode)
   toggleTypewriterModeItem?.addEventListener('click', toggleTypewriterMode)
@@ -195,12 +192,6 @@ export function initKeyboardShortcuts(): void {
         const imageManager = new ImageInsertManager(editor)
         imageManager.showInsertDialog()
       }
-    }
-    
-    // Ctrl+\ 切换分屏视图
-    if ((e.ctrlKey || e.metaKey) && e.key === '\\') {
-      e.preventDefault()
-      toggleSplitView()
     }
     
     // Ctrl+M 插入行内公式

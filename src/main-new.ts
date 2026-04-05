@@ -5,7 +5,6 @@ import { handleFileDrop, saveFile, openFile, generateId } from './fileManager'
 import { initFindReplace } from './findReplace'
 import { initWordCount } from './wordCount'
 import { initThemes } from './themes'
-import { initSplitView } from './splitView'
 import { initAutoSave } from './autoSave'
 import { initCodeFolding } from './codeFolding'
 import { initPrintPreview } from './printPreview'
@@ -48,9 +47,6 @@ async function main() {
     
     // Initialize themes
     initThemes()
-    
-    // Initialize split view
-    initSplitView()
     
     // Initialize auto save
     initAutoSave()

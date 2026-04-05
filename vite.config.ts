@@ -42,8 +42,7 @@ export default defineConfig(async () => ({
           'editor-features': [
             './src/outline.ts',
             './src/findReplace.ts', 
-            './src/wordCount.ts',
-            './src/splitView.ts'
+            './src/wordCount.ts'
           ],
           // 将高级功能分离
           'advanced-features': [

@@ -4,7 +4,6 @@ import { openFile, saveFile, openFolder } from './fileManager'
 import { toggleFindReplace } from './findReplace'
 import { exportToHTML, exportToPDF } from './export'
 import { showThemeSelector } from './themes'
-import { toggleSplitView } from './splitView'
 import { showPrintPreview } from './printPreview'
 import { toggleFocusMode, toggleTypewriterMode } from './focusMode'
 import { showFullSourceEditor } from './sourceEditor'
@@ -210,13 +209,6 @@ const commands: Command[] = [
   },
   
   // View commands
-  {
-    id: 'view.splitView',
-    name: '分屏视图',
-    shortcut: 'Ctrl+\\',
-    category: '视图',
-    action: toggleSplitView
-  },
   {
     id: 'view.focusMode',
     name: '专注模式',

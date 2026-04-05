@@ -2368,7 +2368,6 @@ body.dark-mode .stats-value {
 .find-replace-btn,
 .stats-btn,
 .toc-btn,
-.split-view-btn,
 .template-btn,
 .comparison-btn {
   display: none !important;
@@ -2596,67 +2595,6 @@ body {
   font-weight: 500;
   background: var(--color-background);
   color: var(--color-text);
-}
-
-/* Split View */
-.split-view-btn {
-  bottom: 160px;
-  right: 20px;
-}
-
-.split-view-container {
-  display: flex;
-  height: 100%;
-  width: 100%;
-}
-
-.split-pane {
-  height: 100%;
-  overflow: hidden;
-  position: relative;
-}
-
-.editor-pane {
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-}
-
-.preview-pane {
-  width: 50%;
-  background: var(--editor-background);
-  border-left: 1px solid var(--color-border);
-  overflow-y: auto;
-}
-
-.preview-content {
-  padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
-  font-size: var(--editor-font-size);
-  line-height: var(--editor-line-height);
-  color: var(--editor-text);
-}
-
-.split-resizer {
-  width: 5px;
-  background: var(--color-border);
-  cursor: col-resize;
-  position: relative;
-  transition: background-color 0.2s ease;
-}
-
-.split-resizer:hover {
-  background: var(--color-primary);
-}
-
-body.resizing-split {
-  cursor: col-resize;
-  user-select: none;
-}
-
-body.resizing-split .split-resizer {
-  background: var(--color-primary);
 }
 
 /* Auto Save Indicator */
@@ -3085,9 +3023,6 @@ input:checked + .slider:before {
 }
 
 /* Adjust button positions */
-.split-view-btn {
-  bottom: 160px;
-}
 
 .code-folding-btn {
   bottom: 210px;
