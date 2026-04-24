@@ -431,17 +431,77 @@ function areHeadingsEqual(oldHeadings: HeadingStructure[], newHeadings: HeadingS
   return true
 }
 
+function getHeadingElement(pos: number): HTMLElement | null {
+  const editor = getEditor()
+  if (!editor) return null
+
+  const element = editor.view.nodeDOM(pos)
+  return element instanceof HTMLElement ? element : null
+}
+
+function getHeadingSelectionPosition(pos: number): number {
+  return pos + 1
+}
+
+function scrollToHeading(pos: number): void {
+  const element = getHeadingElement(pos)
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+}
+
+function getCurrentVisibleHeadingIndex(): number {
+  let currentHeadingIndex = -1
+  let smallestVisibleTop = Number.POSITIVE_INFINITY
+
+  for (let i = 0; i < lastOutlineStructure.length; i++) {
+    const heading = lastOutlineStructure[i]
+    const element = getHeadingElement(heading.pos)
+    if (!element) continue
+
+    const rect = element.getBoundingClientRect()
+    if (rect.bottom <= 0) {
+      continue
+    }
+
+    if (rect.top <= 0) {
+      return i
+    }
+
+    if (rect.top < smallestVisibleTop) {
+      smallestVisibleTop = rect.top
+      currentHeadingIndex = i
+    }
+  }
+
+  return currentHeadingIndex
+}
+
+function bindEditorScrollSync(): void {
+  const editorContainer = document.getElementById('editor')
+  if (!editorContainer || editorContainer.dataset.outlineScrollBound === 'true') {
+    return
+  }
+
+  editorContainer.addEventListener('scroll', () => {
+    updateActiveOutlineItem()
+  })
+  editorContainer.dataset.outlineScrollBound = 'true'
+}
+
 // 渲染大纲内容
 function renderOutline(headings: HeadingStructure[]): void {
   const outlineContent = document.getElementById('outline-content')
   if (!outlineContent) return
-  
+
+  bindEditorScrollSync()
+
   // 保存当前滚动位置
   const scrollTop = outlineContent.scrollTop
-  
+
   // 创建一个新的容器用于构建大纲
   const tempContainer = document.createElement('div')
-  
+
   if (headings.length === 0) {
     // 没有标题时显示提示
     tempContainer.innerHTML = '<div class="outline-placeholder">文档中没有标题内容</div>'
@@ -453,48 +513,33 @@ function renderOutline(headings: HeadingStructure[]): void {
       outlineItem.textContent = heading.text || `标题 ${index + 1}`
       outlineItem.dataset.index = index.toString()
       outlineItem.dataset.position = heading.pos.toString()
-      
+
       // 点击大纲项跳转到对应位置
       outlineItem.addEventListener('click', () => {
         const editor = getEditor()
         if (editor) {
-          // 使用Tiptap API设置光标位置
-          editor.commands.setTextSelection(heading.pos)
-          
-          // 获取选中节点的DOM元素并滚动到视图中
-          const { view } = editor
-          const domAtPos = view.domAtPos(heading.pos)
-          if (domAtPos && domAtPos.node) {
-            const element = domAtPos.node.nodeType === Node.TEXT_NODE 
-              ? domAtPos.node.parentElement 
-              : domAtPos.node as HTMLElement
-            
-            if (element) {
-              element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            }
-          }
-          
-          // 设置编辑器焦点
           editor.commands.focus()
-          
+          editor.commands.setTextSelection(getHeadingSelectionPosition(heading.pos))
+          scrollToHeading(heading.pos)
+
           // 设置活动状态
           setActiveOutlineItem(outlineItem)
         }
       })
-      
+
       tempContainer.appendChild(outlineItem)
     })
   }
-  
+
   // 替换整个内容区域
   outlineContent.innerHTML = ''
   while (tempContainer.firstChild) {
     outlineContent.appendChild(tempContainer.firstChild)
   }
-  
+
   // 恢复滚动位置
   outlineContent.scrollTop = scrollTop
-  
+
   // 更新活动项
   updateActiveOutlineItem()
 }
@@ -503,30 +548,14 @@ function renderOutline(headings: HeadingStructure[]): void {
 function updateActiveOutlineItem(): void {
   const editor = getEditor()
   if (!editor || !isOutlinePanelVisible) return
-  
-  // 获取当前光标位置
-  const { from } = editor.state.selection
-  let currentHeadingIndex = -1
-  
-  // 查找当前光标所在的标题或其父标题
-  for (let i = 0; i < lastOutlineStructure.length; i++) {
-    const heading = lastOutlineStructure[i]
-    const nextHeading = i < lastOutlineStructure.length - 1 ? lastOutlineStructure[i + 1] : null
-    
-    // 检查光标是否在这个标题的范围内
-    if (from >= heading.pos) {
-      if (nextHeading === null || from < nextHeading.pos) {
-        currentHeadingIndex = i
-        break
-      }
-    }
-  }
-  
+
+  const currentHeadingIndex = getCurrentVisibleHeadingIndex()
+
   // 移除所有大纲项的活动状态
   document.querySelectorAll('.outline-item').forEach(item => {
     item.classList.remove('active')
   })
-  
+
   // 如果找到了当前标题，高亮对应的大纲项
   if (currentHeadingIndex !== -1) {
     const activeItem = document.querySelector(`.outline-item[data-index="${currentHeadingIndex}"]`)
