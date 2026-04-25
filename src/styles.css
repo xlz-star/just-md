@@ -927,16 +927,21 @@ body.resizing-outline .outline-panel {
 }
 
 .file-tree-item {
+  position: relative;
+  white-space: nowrap;
+}
+
+.file-tree-item-content {
   display: flex;
   align-items: center;
   padding: 4px 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
-  position: relative;
-  white-space: nowrap;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.file-tree-item:hover {
+.file-tree-item-content:hover {
   background-color: rgba(25, 113, 194, 0.08);
 }
 
@@ -953,7 +958,7 @@ body.resizing-outline .outline-panel {
   flex-shrink: 0;
 }
 
-.file-tree-item:hover .file-tree-icon {
+.file-tree-item-content:hover .file-tree-icon {
   transform: scale(1.1);
 }
 

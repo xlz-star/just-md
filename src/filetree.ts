@@ -176,8 +176,11 @@ function renderFileTreeContent(): void {
     items.forEach(item => {
       const li = document.createElement('li')
       li.className = 'file-tree-item'
-      li.style.paddingLeft = `${level * 20}px`
-      
+
+      const content = document.createElement('div')
+      content.className = 'file-tree-item-content'
+      content.style.paddingLeft = `${level * 20}px`
+
       // 添加展开/折叠图标（仅目录）
       if (item.isDirectory) {
         const expandIcon = document.createElement('span')
@@ -188,38 +191,38 @@ function renderFileTreeContent(): void {
           e.stopPropagation()
           await toggleDirectory(item)
         })
-        li.appendChild(expandIcon)
+        content.appendChild(expandIcon)
       } else {
         // 为文件添加占位符，保持对齐
         const spacer = document.createElement('span')
         spacer.style.width = '20px'
         spacer.style.display = 'inline-block'
-        li.appendChild(spacer)
+        content.appendChild(spacer)
       }
-      
+
       const icon = document.createElement('span')
       icon.className = 'file-tree-icon'
-      
+
       if (item.isDirectory) {
         icon.innerHTML = item.isExpanded ? '📂' : '📁'
       } else {
         icon.innerHTML = '📄'
       }
-      
+
       const name = document.createElement('span')
       name.className = 'file-tree-name'
       name.textContent = item.name
-      
+
       if (!item.isDirectory) {
         name.addEventListener('click', async () => {
           // 集成文件管理模块，打开文件
           try {
             // 获取渲染后的HTML内容用于显示
             const htmlContent = await invoke<string>('read_markdown', { path: item.path })
-            
+
             // 同时获取原始Markdown内容用于保存
             const markdownContent = await invoke<string>('get_raw_markdown', { path: item.path })
-            
+
             if (htmlContent && markdownContent) {
               // 创建文件对象，保存原始Markdown内容
               const file: OpenedFile = {
@@ -229,28 +232,28 @@ function renderFileTreeContent(): void {
                 content: markdownContent, // 保存原始Markdown
                 isDirty: false
               }
-              
+
               // 添加到标签列表并设置编辑器内容为渲染后的HTML
               addFileTab(file, false) // 先添加到标签，但不激活（避免触发switchToFile中的setEditorContent）
-              
+
               // 手动设置当前文件信息
               setCurrentFile(file.path, file.name)
-              
+
               // 重置大纲结构
               resetOutlineState()
-              
+
               // 设置编辑器内容为渲染后的HTML，同时传入原始Markdown
               setEditorContent(htmlContent, markdownContent)
-              
+
               // 确保编辑器内容不是默认样式
               const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
               if (proseMirror) {
                 proseMirror.classList.remove('using-default-content')
               }
-              
+
               // 更新标签样式
               updateTabsActiveState(file.id)
-              
+
               // 更新大纲
               updateOutlineIfNeeded()
             }
@@ -265,11 +268,12 @@ function renderFileTreeContent(): void {
           await toggleDirectory(item)
         })
       }
-      
-      li.appendChild(icon)
-      li.appendChild(name)
+
+      content.appendChild(icon)
+      content.appendChild(name)
+      li.appendChild(content)
       ul.appendChild(li)
-      
+
       // 如果是展开的目录，渲染子项目
       if (item.isDirectory && item.isExpanded && item.children && item.children.length > 0) {
         renderItems(item.children, li, level + 1)

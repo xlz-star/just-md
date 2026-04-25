@@ -1,4 +1,9 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
+
+const tauriCoreMock = fileURLToPath(new URL('./test/mocks/tauri-core.ts', import.meta.url))
+const tauriDialogMock = fileURLToPath(new URL('./test/mocks/tauri-dialog.ts', import.meta.url))
+const tauriFsMock = fileURLToPath(new URL('./test/mocks/tauri-fs.ts', import.meta.url))
 
 export default defineConfig({
   test: {
@@ -18,9 +23,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@tauri-apps/api/core': './test/mocks/tauri-core.ts',
-      '@tauri-apps/plugin-dialog': './test/mocks/tauri-dialog.ts',
-      '@tauri-apps/plugin-fs': './test/mocks/tauri-fs.ts',
+      '@tauri-apps/api/core': tauriCoreMock,
+      '@tauri-apps/plugin-dialog': tauriDialogMock,
+      '@tauri-apps/plugin-fs': tauriFsMock,
     },
   },
 })
