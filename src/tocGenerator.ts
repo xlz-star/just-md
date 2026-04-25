@@ -115,15 +115,14 @@ export function generateToc(): TocItem[] {
 function jumpToHeading(id: string): void {
   const editor = getEditor()
   if (!editor) return
-  
+
   const pos = parseInt(id.replace('heading-', ''))
   editor.commands.focus()
   editor.commands.setTextSelection(pos)
-  
-  // Scroll into view
-  const { node } = editor.view.domAtPos(pos)
-  if (node && node.nodeType === Node.ELEMENT_NODE) {
-    (node as Element).scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+  const element = editor.view.nodeDOM(pos)
+  if (element instanceof HTMLElement) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 }
 

@@ -1,0 +1,51 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: Just MD
+        - generic [ref=e6]:
+          - generic [ref=e8] [cursor=pointer]: 文件
+          - generic [ref=e10] [cursor=pointer]: 编辑
+          - generic [ref=e12] [cursor=pointer]: 视图
+      - button "设置" [ref=e14] [cursor=pointer]
+      - generic [ref=e15] [cursor=pointer]:
+        - generic [ref=e16]: 
+        - generic [ref=e17]: 自动保存已关闭
+    - text:   
+    - generic [ref=e18]:
+      - generic:
+        - generic:
+          - heading "文档大纲" [level=3]
+          - generic:
+            - button "":
+              - generic: 
+            - button "":
+              - generic: 
+            - button "":
+              - generic: 
+        - generic "调整大纲宽度"
+      - textbox [ref=e20]:
+        - paragraph [ref=e21]: 输入你的 Markdown 内容或打开 md 文件...
+    - button "" [ref=e22] [cursor=pointer]:
+      - generic [ref=e23]: 
+    - generic [ref=e25] [cursor=pointer]:
+      - generic [ref=e26]:
+        - generic [ref=e27]: 
+        - generic [ref=e28]: "13"
+        - text: 字
+      - generic [ref=e29]: "|"
+      - generic [ref=e30]:
+        - generic [ref=e31]: 
+        - generic [ref=e32]: "24"
+        - text: 字符
+      - generic [ref=e33]: "|"
+      - generic [ref=e34]:
+        - generic [ref=e35]: 
+        - generic [ref=e36]: "1"
+        - text: 段落
+      - generic [ref=e37]: "|"
+      - generic [ref=e38]:
+        - generic [ref=e39]: 
+        - generic [ref=e40]: "1"
+        - text: 分钟
+  - text:                           
