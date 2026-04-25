@@ -28,7 +28,10 @@
     "active": true,
     "targets": [
       "deb",
-      "appimage"
+      "appimage",
+      "msi",
+      "nsis",
+      "dmg"
     ],
     "icon": [
       "icons/icon.png",

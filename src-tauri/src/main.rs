@@ -662,8 +662,8 @@ fn store_pending_open_file(path: String) {
 }
 
 #[cfg(target_os = "macos")]
-fn setup_macos_app_menu<R: tauri::Runtime>(app: &tauri::App<R>) -> Result<(), Box<dyn std::error::Error>> {
-    let handle = app.handle();
+fn setup_macos_app_menu<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> Result<(), Box<dyn std::error::Error>> {
+    let handle = app;
 
     let app_menu = SubmenuBuilder::new(handle, "应用")
         .item(&PredefinedMenuItem::about(
