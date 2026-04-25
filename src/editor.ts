@@ -16,6 +16,7 @@ import { AutoImageExtension } from './autoImageExtension'
 import { ImageContextMenu } from './imageContextMenu'
 import { TableToolbar, setupTableShortcuts } from './tableToolbar'
 import { SpellCheckExtension } from './spellCheck'
+import { SvgBlock } from './svgExtension'
 import 'highlight.js/styles/github.css'
 
 // 注册常用的编程语言
@@ -159,6 +160,7 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
       MathBlock,
       Footnote,
       AutoImageExtension,
+      SvgBlock,
       Image.configure({
         HTMLAttributes: {
           class: 'markdown-image',

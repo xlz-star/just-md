@@ -1300,6 +1300,14 @@ body.dark-mode .ProseMirror img.markdown-image.ProseMirror-selectednode {
   outline: 2px solid #74c0fc;
 }
 
+.ProseMirror img.markdown-svg {
+  background: transparent;
+}
+
+body.dark-mode .ProseMirror img.markdown-svg {
+  opacity: 1;
+}
+
 body.dark-mode .ProseMirror a.markdown-link {
   color: #74c0fc;
 }
