@@ -1,0 +1,79 @@
+name: release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            rust-target: x86_64-unknown-linux-gnu
+            display-name: Linux x64
+          - os: windows-latest
+            rust-target: x86_64-pc-windows-msvc
+            display-name: Windows x64
+          - os: macos-13
+            rust-target: x86_64-apple-darwin
+            display-name: macOS Intel
+          - os: macos-14
+            rust-target: aarch64-apple-darwin
+            display-name: macOS Apple Silicon
+
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.display-name }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-target }}
+
+      - name: Cache Rust dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Install frontend dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build and upload release assets
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tauriScript: bun tauri
+          tagName: v__VERSION__
+          releaseName: Just MD v__VERSION__
+          releaseBody: |
+            请在 Assets 中下载对应平台的安装包。
+          releaseDraft: false
+          prerelease: false
+          args: --target ${{ matrix.rust-target }}
