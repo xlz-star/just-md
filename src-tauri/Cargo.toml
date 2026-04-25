@@ -1,6 +1,6 @@
 [package]
 name = "just-md"
-version = "1.0.3"
+version = "1.0.4"
 description = "A simple Markdown editor"
 authors = ["You"]
 edition = "2021"
