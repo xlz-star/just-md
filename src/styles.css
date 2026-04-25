@@ -3392,7 +3392,8 @@ body.dark-mode .image-resize-wrapper:hover img {
 }
 
 /* 图片右键菜单样式 */
-.image-context-menu {
+.image-context-menu,
+.editor-context-menu {
   position: fixed;
   z-index: 10000;
   background: var(--bg-primary, #ffffff);
@@ -3456,7 +3457,8 @@ body.dark-mode .image-resize-wrapper:hover img {
 }
 
 /* 暗色模式下的右键菜单 */
-body.dark-mode .image-context-menu {
+body.dark-mode .image-context-menu,
+body.dark-mode .editor-context-menu {
   background: var(--bg-primary, #1e1e1e);
   border-color: var(--border-color, #333);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);

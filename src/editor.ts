@@ -14,6 +14,7 @@ import { MathInline, MathBlock } from './mathExtension'
 import { Footnote } from './footnoteExtension'
 import { AutoImageExtension } from './autoImageExtension'
 import { ImageContextMenu } from './imageContextMenu'
+import { EditorContextMenu } from './editorContextMenu'
 import { TableToolbar, setupTableShortcuts } from './tableToolbar'
 import { SpellCheckExtension } from './spellCheck'
 import { SvgBlock } from './svgExtension'
@@ -168,6 +169,7 @@ export function initEditor(content: string = '', onContentChange?: (isDirty: boo
         inline: true,
       }),
       ImageContextMenu,
+      EditorContextMenu,
     ],
     content: content || defaultContent,
     editorProps: {

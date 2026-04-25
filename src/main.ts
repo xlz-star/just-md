@@ -13,6 +13,7 @@ import { initFocusMode } from './focusMode'
 import { initSettings } from './settings'
 import { initSourceEditor } from './sourceEditor'
 import { initImageContextMenu } from './imageContextMenu'
+import { initEditorContextMenu } from './editorContextMenu'
 import { UIAnimations } from './uiAnimations'
 import { initSpellCheck } from './spellCheck'
 import { initWritingStats } from './writingStats'
@@ -110,7 +111,10 @@ async function main() {
     
     // 初始化图片右键菜单
     initImageContextMenu()
-    
+
+    // 初始化普通编辑区右键菜单
+    initEditorContextMenu()
+
     // 延迟初始化字数统计功能，确保编辑器已创建
     setTimeout(() => {
       initWordCount()

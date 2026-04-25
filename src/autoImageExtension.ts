@@ -11,6 +11,10 @@ function isImageUrl(url: string): boolean {
   return IMAGE_URL_REGEX.test(url)
 }
 
+function getPlainTextFromClipboard(clipboardData: DataTransfer): string {
+  return clipboardData.getData('text/plain').trim()
+}
+
 // 从 URL 中提取文件名作为 alt 文本
 function getAltFromUrl(url: string): string {
   try {
@@ -39,6 +43,52 @@ async function handleClipboardImageFile(file: File): Promise<string | null> {
     console.error('处理剪贴板图片失败:', error)
     return null
   }
+}
+
+export function handleAutoImagePaste(view: EditorView, event: ClipboardEvent): boolean {
+  const clipboardData = event.clipboardData
+  if (!clipboardData) return false
+
+  const items = clipboardData.items
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
+
+    if (item.kind === 'file' && item.type.startsWith('image/')) {
+      event.preventDefault()
+      const file = item.getAsFile()
+      if (!file) return false
+
+      handleClipboardImageFile(file).then(url => {
+        if (url) {
+          const alt = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') || 'image'
+          const { state } = view
+          const { from, to } = state.selection
+          const imageNode = state.schema.nodes.image?.create({ src: url, alt })
+          if (imageNode) {
+            view.dispatch(state.tr.replaceWith(from, to, imageNode))
+          }
+        }
+      })
+      return true
+    }
+  }
+
+  const plainText = getPlainTextFromClipboard(clipboardData)
+  if (!plainText || !isImageUrl(plainText)) {
+    return false
+  }
+
+  event.preventDefault()
+  const alt = getAltFromUrl(plainText)
+  const { state } = view
+  const { from, to } = state.selection
+  const imageNode = state.schema.nodes.image?.create({ src: plainText, alt })
+  if (!imageNode) {
+    return false
+  }
+
+  view.dispatch(state.tr.replaceWith(from, to, imageNode))
+  return true
 }
 
 export const AutoImageExtension = Extension.create({
@@ -84,64 +134,7 @@ export const AutoImageExtension = Extension.create({
         key: new PluginKey('autoImage'),
 
         props: {
-          handlePaste: (view: EditorView, event: ClipboardEvent) => {
-            const clipboardData = event.clipboardData
-            if (!clipboardData) return false
-
-            // 1. 处理剪贴板中的图片文件（如截图、复制的图片文件）
-            const items = clipboardData.items
-            for (let i = 0; i < items.length; i++) {
-              const item = items[i]
-
-              if (item.kind === 'file' && item.type.startsWith('image/')) {
-                event.preventDefault()
-                const file = item.getAsFile()
-                if (!file) return false
-
-                handleClipboardImageFile(file).then(url => {
-                  if (url) {
-                    const alt = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') || 'image'
-                    const { state } = view
-                    const { from, to } = state.selection
-                    const imageNode = state.schema.nodes.image?.create({ src: url, alt })
-                    if (imageNode) {
-                      view.dispatch(state.tr.replaceWith(from, to, imageNode))
-                    }
-                  }
-                })
-                return true
-              }
-
-              // 2. 处理纯文本中的图片 URL
-              if (item.kind === 'string' && item.type === 'text/plain') {
-                item.getAsString((text: string) => {
-                  // 检查整个文本是否为图片 URL
-                  if (isImageUrl(text.trim())) {
-                    event.preventDefault()
-                    const url = text.trim()
-                    const alt = getAltFromUrl(url)
-                    const { state } = view
-                    const { from, to } = state.selection
-                    const imageNode = state.schema.nodes.image?.create({ src: url, alt })
-                    if (imageNode) {
-                      view.dispatch(state.tr.replaceWith(from, to, imageNode))
-                    }
-                    return
-                  }
-
-                  // 检查文本中是否包含图片 URL
-                  const urlInText = text.match(/(https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp|svg|bmp|ico|tiff?)(?:\?[^\s]*)?)/gi)
-                  if (urlInText && urlInText.length > 0) {
-                    // 包含 URL 的文本，正常粘贴（让 appendTransaction 处理）
-                    return
-                  }
-                })
-                return true
-              }
-            }
-
-            return false
-          },
+          handlePaste: handleAutoImagePaste,
         },
       }),
     ]
