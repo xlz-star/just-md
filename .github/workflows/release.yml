@@ -58,6 +58,8 @@ jobs:
 
       - name: Cache Rust dependencies
         uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
 
       - name: Install frontend dependencies
         run: bun install --frozen-lockfile
