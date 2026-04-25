@@ -9,6 +9,11 @@ import { toggleFocusMode, toggleTypewriterMode } from './focusMode'
 import { showFullSourceEditor } from './sourceEditor'
 import { insertToc, generateToc } from './tocGenerator'
 
+function openSettingsFromNav(): void {
+  const settingsBtn = document.getElementById('nav-settings-btn')
+  settingsBtn?.click()
+}
+
 interface Command {
   id: string
   name: string
@@ -232,7 +237,7 @@ const commands: Command[] = [
     name: '设置',
     shortcut: 'Ctrl+,',
     category: '视图',
-    action: () => document.getElementById('settings-btn')?.click()
+    action: openSettingsFromNav
   }
 ]
 

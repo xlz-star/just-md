@@ -6,13 +6,18 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use pulldown_cmark::{Parser, Options, html};
+#[cfg(target_os = "macos")]
+use serde_json::json;
 use std::sync::Mutex;
 use std::sync::OnceLock;
 use std::env;
 use chrono::Local;
 use dirs;
 #[cfg(target_os = "macos")]
-use tauri::{Emitter, RunEvent, Url};
+use tauri::{
+    menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, SubmenuBuilder},
+    Emitter, RunEvent, Url,
+};
 
 // 全局当前目录变量
 static CURRENT_DIRECTORY: OnceLock<Mutex<Option<String>>> = OnceLock::new();
@@ -656,6 +661,76 @@ fn store_pending_open_file(path: String) {
     *pending_file = Some(path);
 }
 
+#[cfg(target_os = "macos")]
+fn setup_macos_app_menu<R: tauri::Runtime>(app: &tauri::App<R>) -> Result<(), Box<dyn std::error::Error>> {
+    let handle = app.handle();
+
+    let app_menu = SubmenuBuilder::new(handle, "应用")
+        .item(&PredefinedMenuItem::about(
+            handle,
+            Some("关于 Just MD"),
+            Some(AboutMetadata {
+                name: Some("Just MD".to_string()),
+                version: Some(env!("CARGO_PKG_VERSION").to_string()),
+                ..Default::default()
+            }),
+        )?)
+        .item(&PredefinedMenuItem::separator(handle)?)
+        .item(&MenuItem::with_id(handle, "app.settings", "设置", true, Some("CmdOrCtrl+,"))?)
+        .item(&PredefinedMenuItem::separator(handle)?)
+        .item(&PredefinedMenuItem::services(handle, Some("服务"))?)
+        .item(&PredefinedMenuItem::separator(handle)?)
+        .item(&PredefinedMenuItem::hide(handle, Some("隐藏 Just MD"))?)
+        .item(&PredefinedMenuItem::hide_others(handle, Some("隐藏其他"))?)
+        .item(&PredefinedMenuItem::show_all(handle, Some("全部显示"))?)
+        .item(&PredefinedMenuItem::separator(handle)?)
+        .item(&PredefinedMenuItem::quit(handle, Some("退出 Just MD"))?)
+        .build()?;
+
+    let file_menu = SubmenuBuilder::new(handle, "文件")
+        .item(&MenuItem::with_id(handle, "file.open", "打开文件…", true, Some("CmdOrCtrl+O"))?)
+        .item(&MenuItem::with_id(handle, "file.open_folder", "打开文件夹…", true, Some("CmdOrCtrl+Shift+K"))?)
+        .item(&PredefinedMenuItem::separator(handle)?)
+        .item(&MenuItem::with_id(handle, "file.recent", "最近文件", true, Some("CmdOrCtrl+R"))?)
+        .item(&PredefinedMenuItem::separator(handle)?)
+        .item(&MenuItem::with_id(handle, "file.save", "保存", true, Some("CmdOrCtrl+S"))?)
+        .item(&PredefinedMenuItem::separator(handle)?)
+        .item(&MenuItem::with_id(handle, "file.print_preview", "打印预览", true, Some("CmdOrCtrl+P"))?)
+        .build()?;
+
+    let edit_menu = SubmenuBuilder::new(handle, "编辑")
+        .item(&PredefinedMenuItem::undo(handle, Some("撤销"))?)
+        .item(&PredefinedMenuItem::redo(handle, Some("重做"))?)
+        .item(&PredefinedMenuItem::separator(handle)?)
+        .item(&PredefinedMenuItem::cut(handle, Some("剪切"))?)
+        .item(&PredefinedMenuItem::copy(handle, Some("复制"))?)
+        .item(&PredefinedMenuItem::paste(handle, Some("粘贴"))?)
+        .item(&PredefinedMenuItem::select_all(handle, Some("全选"))?)
+        .build()?;
+
+    let window_menu = SubmenuBuilder::new(handle, "窗口")
+        .item(&PredefinedMenuItem::minimize(handle, Some("最小化"))?)
+        .item(&PredefinedMenuItem::maximize(handle, Some("缩放"))?)
+        .item(&PredefinedMenuItem::fullscreen(handle, Some("进入全屏"))?)
+        .item(&PredefinedMenuItem::separator(handle)?)
+        .item(&PredefinedMenuItem::close_window(handle, Some("关闭窗口"))?)
+        .build()?;
+
+    let help_menu = SubmenuBuilder::new(handle, "帮助")
+        .item(&MenuItem::with_id(handle, "app.about", "关于 Just MD", true, None::<&str>)?)
+        .build()?;
+
+    let menu = Menu::new(handle)?;
+    menu.append(&app_menu)?;
+    menu.append(&file_menu)?;
+    menu.append(&edit_menu)?;
+    menu.append(&window_menu)?;
+    menu.append(&help_menu)?;
+    menu.set_as_app_menu()?;
+
+    Ok(())
+}
+
 fn take_pending_open_file() -> Option<String> {
     let mut pending_file = get_pending_open_file().lock().unwrap();
     pending_file.take()
@@ -691,6 +766,29 @@ fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
+        .on_menu_event(|app, event| {
+            #[cfg(not(target_os = "macos"))]
+            let _ = (&app, &event);
+            #[cfg(target_os = "macos")]
+            {
+                let payload = match event.id().0.as_str() {
+                    "app.settings" => Some(json!({ "action": "open-settings" })),
+                    "app.about" => Some(json!({ "action": "show-about" })),
+                    "file.open" => Some(json!({ "action": "open-file" })),
+                    "file.open_folder" => Some(json!({ "action": "open-folder" })),
+                    "file.recent" => Some(json!({ "action": "recent-files" })),
+                    "file.save" => Some(json!({ "action": "save-file" })),
+                    "file.print_preview" => Some(json!({ "action": "print-preview" })),
+                    _ => None,
+                };
+
+                if let Some(payload) = payload {
+                    if let Err(error) = app.emit("native-menu-action", payload) {
+                        eprintln!("发送原生菜单事件失败: {}", error);
+                    }
+                }
+            }
+        })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
@@ -716,6 +814,13 @@ fn main() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app, event| {
+            #[cfg(target_os = "macos")]
+            if let RunEvent::Ready = event {
+                if let Err(error) = setup_macos_app_menu(app) {
+                    eprintln!("初始化 macOS 菜单失败: {}", error);
+                }
+            }
+
             #[cfg(target_os = "macos")]
             {
                 if let RunEvent::Opened { urls } = event {

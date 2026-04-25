@@ -22,7 +22,39 @@ import { initTemplates } from './templates'
 import { initPerformanceOptimizations } from './performance'
 import { initCodeQuality } from './codeQuality'
 import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
 import './styles.css'
+
+function applyPlatformClass(): void {
+  const isMac = navigator.userAgent.includes('Mac')
+  document.documentElement.classList.toggle('platform-macos', isMac)
+  document.body.classList.toggle('platform-macos', isMac)
+}
+
+async function initializeNativeMenuActions(): Promise<void> {
+  await listen<{ action?: string }>('native-menu-action', async (event) => {
+    switch (event.payload?.action) {
+      case 'open-settings':
+        document.getElementById('nav-settings-btn')?.click()
+        break
+      case 'open-file':
+        await import('./fileManager').then(({ openFile }) => openFile())
+        break
+      case 'open-folder':
+        await import('./fileManager').then(({ openFolder }) => openFolder())
+        break
+      case 'recent-files':
+        await import('./recentFilesDialog').then(({ showRecentFilesDialog }) => showRecentFilesDialog())
+        break
+      case 'save-file':
+        await import('./fileManager').then(({ saveFile }) => saveFile())
+        break
+      case 'print-preview':
+        await import('./printPreview').then(({ showPrintPreview }) => showPrintPreview())
+        break
+    }
+  })
+}
 
 async function initializeFileOpenFlow(): Promise<void> {
   await initializeExternalFileOpenListener()
@@ -40,6 +72,7 @@ async function initializeFileOpenFlow(): Promise<void> {
 // 应用程序入口函数
 async function main() {
   try {
+    applyPlatformClass()
     // 初始化性能优化系统
     initPerformanceOptimizations()
     
@@ -81,6 +114,8 @@ async function main() {
     
     // 初始化打印预览
     initPrintPreview()
+
+    await initializeNativeMenuActions()
     
     // 初始化目录生成器
     initTocGenerator()

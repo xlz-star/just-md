@@ -2475,6 +2475,81 @@ body {
   border-bottom-color: var(--color-border);
 }
 
+.platform-macos #navbar {
+  height: 44px;
+  padding: 0 12px;
+  background-color: color-mix(in srgb, var(--color-surface) 88%, white 12%);
+  border-bottom-color: color-mix(in srgb, var(--color-border) 70%, transparent 30%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.platform-macos #main-content {
+  height: calc(100vh - 44px);
+}
+
+.platform-macos .nav-brand {
+  margin-right: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.platform-macos .menu-item {
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.platform-macos .menu-item:hover,
+.platform-macos .menu-item.active {
+  background-color: color-mix(in srgb, var(--color-text) 8%, transparent 92%);
+}
+
+.platform-macos .dropdown-menu {
+  margin-top: 6px;
+  min-width: 220px;
+  border-radius: 12px;
+  border-color: color-mix(in srgb, var(--color-border) 80%, transparent 20%);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  padding: 6px 0;
+}
+
+.platform-macos .dropdown-item {
+  padding: 8px 14px;
+  border-radius: 8px;
+  margin: 0 6px;
+}
+
+.platform-macos .dropdown-item:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 12%, transparent 88%);
+}
+
+.platform-macos .dropdown-divider {
+  margin: 6px 10px;
+  background-color: color-mix(in srgb, var(--color-border) 72%, transparent 28%);
+}
+
+.platform-macos .nav-settings-btn {
+  min-height: 30px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--color-text) 6%, transparent 94%);
+}
+
+.platform-macos .nav-settings-btn:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 14%, transparent 86%);
+}
+
+.platform-macos .settings-content,
+.platform-macos .theme-modal-content,
+.platform-macos .command-palette-modal,
+.platform-macos .source-dialog-content {
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 78%, transparent 22%);
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.16);
+}
+
 #editor {
   background-color: var(--editor-background);
   color: var(--editor-text);

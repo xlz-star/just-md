@@ -10,6 +10,11 @@ import { showFullSourceEditor } from './sourceEditor'
 import { ImageInsertManager } from './markdownImage'
 import { showRecentFilesDialog } from './recentFilesDialog'
 
+function openSettingsFromNav(): void {
+  const settingsBtn = document.getElementById('nav-settings-btn')
+  settingsBtn?.click()
+}
+
 // 初始化菜单
 export function initMenus(): void {
   // 文件菜单项
@@ -139,8 +144,7 @@ export function initMenus(): void {
   toggleFocusModeItem?.addEventListener('click', toggleFocusMode)
   toggleTypewriterModeItem?.addEventListener('click', toggleTypewriterMode)
   openSettingsItem?.addEventListener('click', () => {
-    const settingsBtn = document.getElementById('settings-btn')
-    settingsBtn?.click()
+    openSettingsFromNav()
   })
   
   // 夜间模式切换事件
@@ -209,10 +213,9 @@ export function initKeyboardShortcuts(): void {
     }
     
     // Ctrl+, 打开设置
-    if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+    if ((e.ctrlKey || e.metaKey) && (e.key === ',' || e.code === 'Comma')) {
       e.preventDefault()
-      const settingsBtn = document.getElementById('settings-btn')
-      settingsBtn?.click()
+      openSettingsFromNav()
     }
     
     // Ctrl+/ 编辑源码
