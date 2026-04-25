@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
 import { open, save } from '@tauri-apps/plugin-dialog'
 import { OpenedFile } from './types'
 import { getEditorContent, setEditorContent, setCurrentFile, getCurrentFilePath, getCurrentMarkdownContent } from './editor'
@@ -19,12 +20,20 @@ export function generateId(): string {
 
 // 检查并刷新文件树
 function refreshFileTreeIfNeeded(): void {
+  if (typeof document === 'undefined') {
+    return
+  }
+
   // 动态导入文件树模块
   import('./filetree').then(filetreeModule => {
+    if (typeof document === 'undefined') {
+      return
+    }
+
     // 检查是否处于文件树视图
     const fileTreeContainer = document.getElementById('file-tree-container')
     const outlinePanel = document.getElementById('outline-panel')
-    
+
     // 如果文件树容器存在且大纲面板可见
     if (fileTreeContainer && outlinePanel && !outlinePanel.classList.contains('hidden')) {
       // 检查是否处于文件树视图模式（通过检查切换按钮的标题）
@@ -39,6 +48,99 @@ function refreshFileTreeIfNeeded(): void {
   })
 }
 
+function getFileName(filePath: string): string {
+  const pathParts = filePath.split(/[/\\]/)
+  return pathParts[pathParts.length - 1]
+}
+
+function finishOpeningFile(file: OpenedFile, htmlContent: string, markdownContent: string): void {
+  addFileTab(file, false)
+  setCurrentFile(file.path, file.name)
+  resetOutlineState()
+  setEditorContent(htmlContent, markdownContent)
+
+  const proseMirror = document.querySelector('.ProseMirror') as HTMLElement | null
+  if (proseMirror) {
+    proseMirror.classList.remove('using-default-content')
+  }
+
+  updateTabsActiveState(file.id)
+  updateOutlineIfNeeded()
+  refreshFileTreeIfNeeded()
+  recentFilesManager.addRecentFile(file.path)
+  window.dispatchEvent(new CustomEvent('file-opened', { detail: { path: file.path } }))
+}
+
+const inFlightOpenFileRequests = new Map<string, Promise<void>>()
+
+export async function openFileByPath(filePath: string): Promise<void> {
+  const existingIndex = openedFiles.findIndex(file => file.path === filePath)
+  if (existingIndex !== -1) {
+    await switchToFile(existingIndex)
+    return
+  }
+
+  const inFlightRequest = inFlightOpenFileRequests.get(filePath)
+  if (inFlightRequest) {
+    await inFlightRequest
+    return
+  }
+
+  const openRequest = (async () => {
+    const fileName = getFileName(filePath)
+    let htmlContent = await invoke<string>('read_markdown', { path: filePath })
+    const markdownContent = await invoke<string>('get_raw_markdown', { path: filePath })
+
+    if (htmlContent == null || markdownContent == null) {
+      console.error('文件内容为空')
+      return
+    }
+
+    htmlContent = processImagePaths(htmlContent, filePath)
+
+    const file: OpenedFile = {
+      id: generateId(),
+      path: filePath,
+      name: fileName,
+      content: markdownContent,
+      isDirty: false
+    }
+
+    finishOpeningFile(file, htmlContent, markdownContent)
+  })()
+
+  inFlightOpenFileRequests.set(filePath, openRequest)
+
+  try {
+    await openRequest
+  } finally {
+    inFlightOpenFileRequests.delete(filePath)
+  }
+}
+
+let externalFileOpenListenerPromise: Promise<void> | null = null
+
+export async function initializeExternalFileOpenListener(): Promise<void> {
+  if (externalFileOpenListenerPromise) {
+    return externalFileOpenListenerPromise
+  }
+
+  externalFileOpenListenerPromise = listen<{ path?: string }>('file-opened', async (event) => {
+    const filePath = event.payload?.path
+    if (!filePath) {
+      return
+    }
+
+    try {
+      await openFileByPath(filePath)
+    } catch (error) {
+      console.error('处理外部打开文件事件失败:', error)
+    }
+  }).then(() => undefined)
+
+  return externalFileOpenListenerPromise
+}
+
 // 打开文件
 export async function openFile(): Promise<void> {
   try {
@@ -49,67 +151,9 @@ export async function openFile(): Promise<void> {
         extensions: ['md', 'markdown']
       }]
     })
-    
+
     if (selected && typeof selected === 'string') {
-      // 从路径中提取文件名
-      const pathParts = selected.split(/[/\\]/)
-      const fileName = pathParts[pathParts.length - 1]
-      
-      try {
-        // 读取渲染后的HTML内容用于显示
-        let htmlContent = await invoke<string>('read_markdown', { path: selected })
-        
-        // 同时获取原始Markdown内容用于保存
-        const markdownContent = await invoke<string>('get_raw_markdown', { path: selected })
-        
-        if (htmlContent && markdownContent) {
-          // 处理HTML中的图片路径
-          htmlContent = processImagePaths(htmlContent, selected)
-          
-          // 创建文件对象，保存原始Markdown内容
-          const file: OpenedFile = {
-            id: generateId(),
-            path: selected,
-            name: fileName,
-            content: markdownContent, // 保存原始Markdown
-            isDirty: false
-          }
-          
-          // 添加到标签列表并设置编辑器内容为渲染后的HTML
-          addFileTab(file, false) // 先添加到标签，但不激活（避免触发switchToFile中的setEditorContent）
-          
-          // 手动设置当前文件信息
-          setCurrentFile(file.path, file.name)
-          
-          // 重置大纲结构
-          resetOutlineState()
-          
-          // 设置编辑器内容为渲染后的HTML，同时传入原始Markdown
-          setEditorContent(htmlContent, markdownContent)
-          
-          // 确保编辑器内容不是默认样式
-          const proseMirror = document.querySelector('.ProseMirror') as HTMLElement
-          if (proseMirror) {
-            proseMirror.classList.remove('using-default-content')
-          }
-          
-          // 更新标签样式
-          updateTabsActiveState(file.id)
-          
-          // 更新大纲
-          updateOutlineIfNeeded()
-          
-          // 刷新文件树（如果需要）
-          refreshFileTreeIfNeeded()
-          
-          // 添加到最近文件列表
-          recentFilesManager.addRecentFile(selected)
-        } else {
-          console.error('文件内容为空')
-        }
-      } catch (err) {
-        console.error('读取文件内容失败:', err)
-      }
+      await openFileByPath(selected)
     }
   } catch (e) {
     console.error('打开文件失败:', e)
@@ -134,10 +178,8 @@ export async function saveFile(): Promise<void> {
       })
       
       if (savePath) {
-        // 从路径中提取文件名
-        const pathParts = savePath.split(/[/\\]/)
-        const fileName = pathParts[pathParts.length - 1]
-        
+        const fileName = getFileName(savePath)
+
         // 更新当前文件信息
         setCurrentFile(savePath, fileName)
         
@@ -568,43 +610,3 @@ export async function openFolder(): Promise<void> {
   }
 }
 
-// 处理最近文件打开事件
-window.addEventListener('openRecentFile', async (event: Event) => {
-  const customEvent = event as CustomEvent;
-  const { file, htmlContent, markdownContent } = customEvent.detail;
-  
-  try {
-    // 添加到标签列表并设置编辑器内容为渲染后的HTML
-    addFileTab(file, false); // 先添加到标签，但不激活（避免触发switchToFile中的setEditorContent）
-    
-    // 手动设置当前文件信息
-    setCurrentFile(file.path, file.name);
-    
-    // 重置大纲结构
-    resetOutlineState();
-    
-    // 设置编辑器内容为渲染后的HTML，同时传入原始Markdown
-    setEditorContent(htmlContent, markdownContent);
-    
-    // 确保编辑器内容不是默认样式
-    const proseMirror = document.querySelector('.ProseMirror') as HTMLElement;
-    if (proseMirror) {
-      proseMirror.classList.remove('using-default-content');
-    }
-    
-    // 更新标签样式
-    updateTabsActiveState(file.id);
-    
-    // 更新大纲
-    updateOutlineIfNeeded();
-    
-    // 刷新文件树（如果需要）
-    refreshFileTreeIfNeeded();
-    
-    // 添加到最近文件列表（更新访问时间）
-    recentFilesManager.addRecentFile(file.path);
-    
-  } catch (error) {
-    console.error('打开最近文件失败:', error);
-  }
-}); 

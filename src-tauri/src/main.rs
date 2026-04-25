@@ -11,9 +11,12 @@ use std::sync::OnceLock;
 use std::env;
 use chrono::Local;
 use dirs;
+#[cfg(target_os = "macos")]
+use tauri::{Emitter, RunEvent, Url};
 
 // 全局当前目录变量
 static CURRENT_DIRECTORY: OnceLock<Mutex<Option<String>>> = OnceLock::new();
+static PENDING_OPEN_FILE: OnceLock<Mutex<Option<String>>> = OnceLock::new();
 
 // 最近文件结构
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -29,6 +32,10 @@ static RECENT_FILES: OnceLock<Mutex<Vec<RecentFile>>> = OnceLock::new();
 // 获取当前目录实例
 fn get_current_directory() -> &'static Mutex<Option<String>> {
     CURRENT_DIRECTORY.get_or_init(|| Mutex::new(None))
+}
+
+fn get_pending_open_file() -> &'static Mutex<Option<String>> {
+    PENDING_OPEN_FILE.get_or_init(|| Mutex::new(None))
 }
 
 // 获取最近文件列表实例
@@ -611,56 +618,75 @@ fn get_cli_args() -> Vec<String> {
     env::args().collect()
 }
 
-// 检查并处理命令行参数中的文件路径
-fn process_cli_args() -> Option<String> {
-    let args: Vec<String> = env::args().collect();
-    
-    // 第一个参数是程序路径，检查是否有第二个参数
-    if args.len() > 1 {
-        let file_path = &args[1];
-        let path = Path::new(file_path);
-        
-        // 检查路径是否存在
-        if path.exists() {
-            // 如果是文件夹，直接返回
-            if path.is_dir() {
-                return Some(file_path.clone());
-            }
-            // 如果是Markdown文件，返回文件路径
-            else if is_markdown_file(file_path) {
-                return Some(file_path.clone());
+fn is_supported_open_path(path: &Path) -> bool {
+    if !path.exists() {
+        return false;
+    }
+
+    path.is_dir() || path.to_str().map(is_markdown_file).unwrap_or(false)
+}
+
+fn update_current_directory_for_path(path: &str) {
+    let path_obj = Path::new(path);
+
+    if path_obj.is_dir() {
+        let mut current_dir = get_current_directory().lock().unwrap();
+        *current_dir = Some(path.to_string());
+    } else if path_obj.is_file() {
+        if let Some(parent) = path_obj.parent() {
+            if let Some(parent_str) = parent.to_str() {
+                let mut current_dir = get_current_directory().lock().unwrap();
+                *current_dir = Some(parent_str.to_string());
             }
         }
     }
-    
+}
+
+#[cfg(target_os = "macos")]
+fn file_path_from_url(url: &Url) -> Option<String> {
+    url.to_file_path()
+        .ok()
+        .filter(|path| is_supported_open_path(path))
+        .map(|path| path.to_string_lossy().to_string())
+}
+
+#[cfg(target_os = "macos")]
+fn store_pending_open_file(path: String) {
+    let mut pending_file = get_pending_open_file().lock().unwrap();
+    *pending_file = Some(path);
+}
+
+fn take_pending_open_file() -> Option<String> {
+    let mut pending_file = get_pending_open_file().lock().unwrap();
+    pending_file.take()
+}
+
+// 检查并处理命令行参数中的文件路径
+fn process_cli_args() -> Option<String> {
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() > 1 {
+        let file_path = &args[1];
+        let path = Path::new(file_path);
+
+        if is_supported_open_path(path) {
+            return Some(file_path.clone());
+        }
+    }
+
     None
 }
 
 // 发送初始文件路径到前端
 #[tauri::command]
 fn get_initial_file() -> Option<String> {
-    process_cli_args()
+    take_pending_open_file().or_else(process_cli_args)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 fn main() {
-    // 处理命令行参数
     if let Some(path) = process_cli_args() {
-        // 如果是目录，设置当前目录
-        let path_obj = Path::new(&path);
-        if path_obj.is_dir() {
-            let mut current_dir = get_current_directory().lock().unwrap();
-            *current_dir = Some(path.clone());
-        }
-        // 如果是文件，设置其父目录为当前目录
-        else if path_obj.is_file() {
-            if let Some(parent) = path_obj.parent() {
-                if let Some(parent_str) = parent.to_str() {
-                    let mut current_dir = get_current_directory().lock().unwrap();
-                    *current_dir = Some(parent_str.to_string());
-                }
-            }
-        }
+        update_current_directory_for_path(&path);
     }
 
     tauri::Builder::default()
@@ -669,7 +695,7 @@ fn main() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
-            read_markdown, 
+            read_markdown,
             save_markdown,
             get_file_tree,
             get_directory_children,
@@ -687,6 +713,26 @@ fn main() {
             get_cli_args,
             get_initial_file
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            #[cfg(target_os = "macos")]
+            {
+                if let RunEvent::Opened { urls } = event {
+                    if let Some(path) = urls.iter().find_map(file_path_from_url) {
+                        update_current_directory_for_path(&path);
+                        store_pending_open_file(path.clone());
+
+                        if let Err(error) = app.emit("file-opened", serde_json::json!({ "path": path })) {
+                            eprintln!("发送文件打开事件失败: {}", error);
+                        }
+                    }
+                }
+            }
+
+            #[cfg(not(target_os = "macos"))]
+            {
+                let _ = (app, event);
+            }
+        });
 }

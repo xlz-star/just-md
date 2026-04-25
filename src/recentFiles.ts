@@ -278,64 +278,19 @@ export class RecentFilesManager {
   // 打开最近文件
   private async openRecentFile(file: RecentFile): Promise<void> {
     try {
-      // 检查文件是否仍然存在  
-      if (!await this.fileExists(file.path)) {
-        // 文件不存在，从列表中移除
-        await this.removeRecentFile(file.path);
-        alert('文件不存在或已被移动');
-        return;
-      }
-
-      // 模拟文件选择事件来打开文件
       await this.openFileByPath(file.path);
-      
     } catch (error) {
       console.error('打开最近文件失败:', error);
-      alert('打开文件失败');
-    }
-  }
-
-  // 检查文件是否存在
-  private async fileExists(filePath: string): Promise<boolean> {
-    try {
-      await invoke('get_raw_markdown', { path: filePath });
-      return true;
-    } catch {
-      return false;
+      await this.removeRecentFile(file.path);
+      alert('文件不存在或已被移动');
     }
   }
 
   // 通过路径打开文件
   private async openFileByPath(filePath: string): Promise<void> {
     try {
-      const pathParts = filePath.split(/[/\\]/);
-      const fileName = pathParts[pathParts.length - 1];
-      
-      // 读取渲染后的HTML内容用于显示
-      const htmlContent = await invoke<string>('read_markdown', { path: filePath });
-      
-      // 同时获取原始Markdown内容用于保存
-      const markdownContent = await invoke<string>('get_raw_markdown', { path: filePath });
-      
-      if (htmlContent && markdownContent) {
-        // 动态导入必要的模块
-        const fileManagerModule = await import('./fileManager');
-
-        // 创建文件对象
-        const file = {
-          id: fileManagerModule.generateId(),
-          path: filePath,
-          name: fileName,
-          content: markdownContent,
-          isDirty: false
-        };
-        
-        // 通过文件管理器的内部方法处理文件打开
-        // 这里需要调用文件管理器的方法，但为了避免循环依赖，我们触发一个自定义事件
-        window.dispatchEvent(new CustomEvent('openRecentFile', { 
-          detail: { file, htmlContent, markdownContent }
-        }));
-      }
+      const fileManagerModule = await import('./fileManager');
+      await fileManagerModule.openFileByPath(filePath);
     } catch (error) {
       console.error('打开文件失败:', error);
       throw error;
